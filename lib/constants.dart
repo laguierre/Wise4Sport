@@ -11,11 +11,12 @@ const double kFontBottomMenu = 25.0;
 const double kFontDevicePageCurrent = 26.0;
 const double kFontValues = 10.0;
 const double kFontBottomDevices = 17;
+const double kPaddingSearchPage = 10;
 const kColorBottomMenu = Colors.black;
 const kColorBottomConnect = Color(0xFF0B8B61);
 const kTextColorAlert = Color(0xFF0B8B61);
 const double kSizeOBJ = 6.5;
-const int delaySplash = 2000;
+const int delaySplash = 5000;
 const int delayTransition = 900;
 
 //const String fileName3D = 'assets/3d/ESP.obj';

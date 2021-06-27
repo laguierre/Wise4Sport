@@ -16,6 +16,12 @@ class MyApp extends StatelessWidget {
       title: 'Wise4Sport',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'Roboto',
+        textTheme: TextTheme(
+          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+          headline6: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
+          bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Roboto'),
+        ),
       ),
       home: SplashScreen(),
     );

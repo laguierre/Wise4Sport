@@ -2,8 +2,12 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:signal_strength_indicator/signal_strength_indicator.dart';
+
+import '../../constants.dart';
 
 class ScanResultTile extends StatelessWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap})
@@ -90,11 +94,17 @@ class ScanResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExpansionTile(
       title: _buildTitle(context),
-      leading: Text(result.rssi.toString()),
-      trailing: RaisedButton(
+      leading: SignalStrengthIndicator.bars(
+          value: ((result.rssi + 100) * 2) / 100,   //https://www.speedguide.net/faq/how-does-rssi-dbm-relate-to-signal-quality-percent-439
+          size: 20,
+          barCount: 5,
+          spacing: 0.2,
+          activeColor: Colors.blue,
+          inactiveColor: Colors.blue[100]
+      ),
+      trailing: ElevatedButton(
+        style: ElevatedButton.styleFrom(primary: kColorBottomConnect,),
         child: Text('CONNECT'),
-        color: Colors.black,
-        textColor: Colors.white,
         onPressed: (result.advertisementData.connectable) ? onTap : null,
       ),
       children: <Widget>[
