@@ -19,6 +19,7 @@ class _SearchDevicesState extends State<SearchDevices> {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: FABSearchDevices(),
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -66,34 +67,31 @@ class _SearchDevicesState extends State<SearchDevices> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(35),
                   ),
-                  child: StreamBuilder<List<ScanResult>>(
-                    stream: FlutterBlue.instance.scanResults,
-                    initialData: [],
-                    builder: (c, snapshot) => Column(
-                      children: snapshot.data!
-                          .map(
-                            (r) => ScanResultTile(
-                              result: r,
-                              onTap: () => Navigator.of(context).push(
-                                  PageRouteBuilder(
-                                      transitionDuration:
-                                          const Duration(milliseconds: 900),
-                                      pageBuilder: (context, animation, _) {
-                                        r.device.connect();
-                                        return FadeTransition(
-                                          opacity: animation,
-                                          child: DevicesPage(device: r.device),
-                                        );
-                                      })
-
-                                  /*MaterialPageRoute(builder: (context) {
-                                  r.device.connect();
-                                  return DevicePage(device: r.device);
-                                })*/
-                                  ),
-                            ),
-                          )
-                          .toList(),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: StreamBuilder<List<ScanResult>>(
+                      stream: FlutterBlue.instance.scanResults,
+                      initialData: [],
+                      builder: (c, snapshot) => Column(
+                        children: snapshot.data!
+                            .map(
+                              (r) => ScanResultTile(
+                                result: r,
+                                onTap: () => Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                        transitionDuration:
+                                            const Duration(milliseconds: 900),
+                                        pageBuilder: (context, animation, _) {
+                                          r.device.connect();
+                                          return FadeTransition(
+                                            opacity: animation,
+                                            child: DevicesPage(device: r.device),
+                                          );
+                                        })),
+                              ),
+                            )
+                            .toList(),
+                      ),
                     ),
                   ),
                 ),
