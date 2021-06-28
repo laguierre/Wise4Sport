@@ -25,7 +25,8 @@ class _SearchDevicesState extends State<SearchDevices> {
           colors: [
             Colors.blueGrey,
             Colors.grey,
-            Colors.red.shade50,
+            Colors.deepOrange.withOpacity(0.3),
+            Colors.red.withOpacity(0.4),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomLeft,
