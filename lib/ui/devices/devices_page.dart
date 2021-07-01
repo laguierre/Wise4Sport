@@ -159,8 +159,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                   ConnectionState.active) {
                                 //var currentValue = _dataParser(snapshot.data);
                                 if(snapshot.hasData)
-                                  prueba = snapshot.data;
-                                //_dataParser(snapshot.data);
+                                _dataParser(snapshot.data!);
                                 return Center(
                                   child: Column(
                                     children: [],
