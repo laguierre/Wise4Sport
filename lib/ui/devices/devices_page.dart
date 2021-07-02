@@ -21,9 +21,10 @@ class _DevicesPageState extends State<DevicesPage> {
   late Stream<List<int>> _stream; //Servicio de Rx
   late Stream<List<int>> _battLevel;
   late List<int> prueba;
-  bool isReady = false;
+  bool isReadyRx = false;
   bool isReadyBatt = false;
   bool isReadyTx = false;
+  late String Pitch = "", Roll = "", Yaw = "";
 
   _DevicesPageState();
 
@@ -31,9 +32,10 @@ class _DevicesPageState extends State<DevicesPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    isReady = false;
+    isReadyRx = false;
     isReadyTx = false;
     isReadyBatt = false;
+    Pitch = "";
     connectToDevice();
   }
 
@@ -43,7 +45,7 @@ class _DevicesPageState extends State<DevicesPage> {
       return;
     }
     new Timer(const Duration(seconds: 15), () {
-      if (!isReady) {
+      if (!isReadyRx) {
         disconnectFromDevice();
         Navigator.of(context).pop(true); //_Pop();
       }
@@ -76,7 +78,7 @@ class _DevicesPageState extends State<DevicesPage> {
             characteristic.setNotifyValue(!characteristic.isNotifying);
             _stream = characteristic.value;
             setState(() {
-              isReady = true;
+              isReadyRx = true;
             });
           }
           if (characteristic.uuid.toString().toUpperCase() ==
@@ -84,7 +86,6 @@ class _DevicesPageState extends State<DevicesPage> {
             characteristicDeviceTx = characteristic;
             setState(() {
               isReadyTx = true;
-              writeData("@O");
             });
           }
         });
@@ -102,47 +103,49 @@ class _DevicesPageState extends State<DevicesPage> {
         });
       }
     });
-    if (!isReady) {
+    if (!isReadyRx) {
       Navigator.of(context).pop(true); //_Pop();
     }
   }
 
-   _dataParser(List<int>dataFromDevice)  {
+  _dataParser(List<int> dataFromDevice) {
     var eulerString = utf8.decode(dataFromDevice);
     var eulerList = eulerString.split(',');
+    print(eulerList);
+    if (eulerList.length == 3) {
+      Pitch = (double.tryParse(eulerList[0]) ?? 0).toStringAsFixed(2);
+      Yaw = (double.tryParse(eulerList[1]) ?? 0).toStringAsFixed(2); //roll
+      Roll = (double.tryParse(eulerList[2]) ?? 0).toStringAsFixed(2);
+    }
   }
 
   writeData(String Data) async {
     if (characteristicDeviceTx == null) {
       return;
+    } else {
+      List<int> bytes = utf8.encode(Data);
+      characteristicDeviceTx.write(bytes);
+      print(bytes.toString());
     }
-    List<int> bytes = utf8.encode(Data);
-    characteristicDeviceTx.write(bytes);
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        return false;
-      },
+      onWillPop: _onWillPop,
       child: Scaffold(
           appBar: AppBar(
             title: Text(widget.device.name),
           ),
           body: SafeArea(
             child: Container(
-                child: !isReady
+                child: !isReadyRx
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              "Waiting...",
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
+                            Text("Waiting..."),
+                            const SizedBox(height: 15),
                             CircularProgressIndicator(
                                 backgroundColor: kPrimaryColor),
                           ],
@@ -158,11 +161,27 @@ class _DevicesPageState extends State<DevicesPage> {
                               if (snapshot.connectionState ==
                                   ConnectionState.active) {
                                 //var currentValue = _dataParser(snapshot.data);
-                                if(snapshot.hasData)
                                 _dataParser(snapshot.data!);
                                 return Center(
                                   child: Column(
-                                    children: [],
+                                    children: [
+                                      TextButton(
+                                          onPressed: () {
+                                            if (isReadyTx) {
+                                              writeData('@3');
+                                            }
+                                          },
+                                          child: Text('Ok')),
+                                      TextButton(
+                                          onPressed: () {
+                                            if (isReadyTx) {
+                                              disconnectFromDevice();
+                                              Navigator.of(context).pop(true);
+                                            }
+                                          },
+                                          child: Text('Volver')),
+                                      Text('$Pitch \t\t $Roll \t\t: $Yaw')
+                                    ],
                                   ),
                                 );
                               } else {
@@ -171,6 +190,16 @@ class _DevicesPageState extends State<DevicesPage> {
                             }))),
           )),
     );
+  }
+
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text(''),
+          ),
+        )) ??
+        false;
   }
 
   AlertDialog ShowAlertDialog(
@@ -195,7 +224,7 @@ class _DevicesPageState extends State<DevicesPage> {
           ),
           onPressed: () {
             if (OnOff) {
-              writeData("@O");
+              writeData("@0");
             }
             disconnectFromDevice();
             Navigator.of(context).pop(true);
@@ -204,4 +233,14 @@ class _DevicesPageState extends State<DevicesPage> {
       ],
     );
   }
+
+  /*Future<bool> _onWillPop() async{
+    return ( await showDialog(
+        context: context,
+        builder: (context) =>
+        ShowAlertDialog(context, "Are you sure?",
+            "Do you want to disconnect device and go back", false) ??
+            false));
+*/
+
 }
