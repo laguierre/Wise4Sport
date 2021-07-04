@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert' show utf8;
+import 'dart:ffi';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
+import 'package:wise4sport/data/wise_class.dart';
 
 import '../../constants.dart';
+
+const int kGPSDataPackeSize = 6;
 
 class DevicesPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -24,7 +29,8 @@ class _DevicesPageState extends State<DevicesPage> {
   bool isReadyRx = false;
   bool isReadyBatt = false;
   bool isReadyTx = false;
-  late String Pitch = "", Roll = "", Yaw = "";
+  late String Pitch = "", Roll = "", Yaw = "", Fila = "";
+  var WiseGPSData = new WiseGPSDataClass();
 
   _DevicesPageState();
 
@@ -110,12 +116,33 @@ class _DevicesPageState extends State<DevicesPage> {
 
   _dataParser(List<int> dataFromDevice) {
     var eulerString = utf8.decode(dataFromDevice);
-    var eulerList = eulerString.split(',');
-    print(eulerList);
-    if (eulerList.length == 3) {
-      Pitch = (double.tryParse(eulerList[0]) ?? 0).toStringAsFixed(2);
-      Yaw = (double.tryParse(eulerList[1]) ?? 0).toStringAsFixed(2); //roll
-      Roll = (double.tryParse(eulerList[2]) ?? 0).toStringAsFixed(2);
+    var eulerList = eulerString.split(';');
+
+    if (eulerList.length == kGPSDataPackeSize) {
+      var GPSData = eulerList[0].split(',');
+      if (GPSData.length == 3) {
+        WiseGPSData.TimeStamp = GPSData[0];
+        WiseGPSData.Flag = GPSData[0];
+        WiseGPSData.Fix = GPSData[2];
+      }
+      GPSData = eulerList[1].split(',');
+      if (GPSData.length == 2) {
+        WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
+        WiseGPSData.LONG = GPSData[1];
+      }
+      GPSData = eulerList[2].split(',');
+      if (GPSData.length == 2) {
+        WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
+        WiseGPSData.VelN = GPSData[1];
+      }
+      GPSData = eulerList[3].split(',');
+      if (GPSData.length == 3) {
+        WiseGPSData.aACC = GPSData[0].replaceAll("ACC:", "");
+        WiseGPSData.vACC = GPSData[1];
+        WiseGPSData.sACC = GPSData[2];
+      }
+      WiseGPSData.PDOP = eulerList[4].replaceAll('PDOP: ', "");
+      WiseGPSData.SAT = eulerList[5].replaceAll('SAT: ', "");
     }
   }
 
@@ -180,7 +207,37 @@ class _DevicesPageState extends State<DevicesPage> {
                                             }
                                           },
                                           child: Text('Volver')),
-                                      Text('$Pitch \t\t $Roll \t\t: $Yaw')
+                                      Text(WiseGPSData.getTimeStamp()),
+                                      Text(WiseGPSData.getFix()),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text('LAT: ' + WiseGPSData.getLAT()),
+                                          Text('LONG: ' + WiseGPSData.getLONG())
+                                        ],
+                                      ),
+                                      Text('East Speed: ' +
+                                          WiseGPSData.getSpeedEast() +
+                                          '\t\tNorth Speed: ' +
+                                          WiseGPSData.getSpeedNorth()),
+                                      Text('aACC: ' +
+                                          WiseGPSData.getaAcc() +
+                                          '\t\tvACC: ' +
+                                          WiseGPSData.getvAcc() +
+                                          '\t\tsACC: ' +
+                                          WiseGPSData.getsAcc()),
+                                      Text('PDOP: ' + WiseGPSData.getPDOP()),
+                                      Text('Visible SAT: ' +
+                                          WiseGPSData.getSAT()),
+                                      SizedBox(height: 80),
+                                      TextButton(
+                                          onPressed: () {
+                                            if (isReadyTx) {
+                                              writeData('@0');
+                                            }
+                                          },
+                                          child: Text('OFF')),
                                     ],
                                   ),
                                 );
@@ -192,55 +249,30 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
+  ///Back to the search page///
   Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
-            title: Text(''),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(15))),
+            title: Text("Are you sure?"),
+            content: Text('Do you want to disconnect device and go back'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    disconnectFromDevice();
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Text('Yes')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: Text('No'))
+            ],
           ),
         )) ??
         false;
   }
-
-  AlertDialog ShowAlertDialog(
-      BuildContext context, String title, String content, bool OnOff) {
-    return new AlertDialog(
-      elevation: 50,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(15))),
-      title: Text('Prueba'),
-      content: Text('Prueba'),
-      actions: <Widget>[
-        new TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: new Text(
-              'No',
-              style: TextStyle(color: Colors.black, fontSize: 18),
-            )),
-        new TextButton(
-          child: new Text(
-            'Yes',
-            style: TextStyle(color: Colors.black, fontSize: 18),
-          ),
-          onPressed: () {
-            if (OnOff) {
-              writeData("@0");
-            }
-            disconnectFromDevice();
-            Navigator.of(context).pop(true);
-          },
-        ),
-      ],
-    );
-  }
-
-  /*Future<bool> _onWillPop() async{
-    return ( await showDialog(
-        context: context,
-        builder: (context) =>
-        ShowAlertDialog(context, "Are you sure?",
-            "Do you want to disconnect device and go back", false) ??
-            false));
-*/
-
 }
