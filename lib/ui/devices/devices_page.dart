@@ -158,6 +158,7 @@ class _DevicesPageState extends State<DevicesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final PageController _controller = PageController(initialPage: 0);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -189,57 +190,69 @@ class _DevicesPageState extends State<DevicesPage> {
                                   ConnectionState.active) {
                                 //var currentValue = _dataParser(snapshot.data);
                                 _dataParser(snapshot.data!);
-                                return Center(
-                                  child: Column(
-                                    children: [
-                                      TextButton(
-                                          onPressed: () {
-                                            if (isReadyTx) {
-                                              writeData('@3');
-                                            }
-                                          },
-                                          child: Text('Ok')),
-                                      TextButton(
-                                          onPressed: () {
-                                            if (isReadyTx) {
-                                              disconnectFromDevice();
-                                              Navigator.of(context).pop(true);
-                                            }
-                                          },
-                                          child: Text('Volver')),
-                                      Text(WiseGPSData.getTimeStamp()),
-                                      Text(WiseGPSData.getFix()),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                return PageView(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: _controller,
+                                  children: [
+                                    Center(
+                                      child: Column(
                                         children: [
-                                          Text('LAT: ' + WiseGPSData.getLAT()),
-                                          Text('LONG: ' + WiseGPSData.getLONG())
+                                          TextButton(
+                                              onPressed: () {
+                                                if (isReadyTx) {
+                                                  writeData('@3');
+                                                }
+                                              },
+                                              child: Text('Ok')),
+                                          TextButton(
+                                              onPressed: () {
+                                                if (isReadyTx) {
+                                                  disconnectFromDevice();
+                                                  Navigator.of(context)
+                                                      .pop(true);
+                                                }
+                                              },
+                                              child: Text('Volver')),
+                                          Text(WiseGPSData.getTimeStamp()),
+                                          Text(WiseGPSData.getFix()),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('LAT: ' +
+                                                  WiseGPSData.getLAT()),
+                                              Text('LONG: ' +
+                                                  WiseGPSData.getLONG())
+                                            ],
+                                          ),
+                                          Text('East Speed: ' +
+                                              WiseGPSData.getSpeedEast() +
+                                              '\t\tNorth Speed: ' +
+                                              WiseGPSData.getSpeedNorth()),
+                                          Text('aACC: ' +
+                                              WiseGPSData.getaAcc() +
+                                              '\t\tvACC: ' +
+                                              WiseGPSData.getvAcc() +
+                                              '\t\tsACC: ' +
+                                              WiseGPSData.getsAcc()),
+                                          Text(
+                                              'PDOP: ' + WiseGPSData.getPDOP()),
+                                          Text('Visible SAT: ' +
+                                              WiseGPSData.getSAT()),
+                                          SizedBox(height: 80),
+                                          TextButton(
+                                              onPressed: () {
+                                                if (isReadyTx) {
+                                                  writeData('@0');
+                                                }
+                                              },
+                                              child: Text('OFF')),
                                         ],
                                       ),
-                                      Text('East Speed: ' +
-                                          WiseGPSData.getSpeedEast() +
-                                          '\t\tNorth Speed: ' +
-                                          WiseGPSData.getSpeedNorth()),
-                                      Text('aACC: ' +
-                                          WiseGPSData.getaAcc() +
-                                          '\t\tvACC: ' +
-                                          WiseGPSData.getvAcc() +
-                                          '\t\tsACC: ' +
-                                          WiseGPSData.getsAcc()),
-                                      Text('PDOP: ' + WiseGPSData.getPDOP()),
-                                      Text('Visible SAT: ' +
-                                          WiseGPSData.getSAT()),
-                                      SizedBox(height: 80),
-                                      TextButton(
-                                          onPressed: () {
-                                            if (isReadyTx) {
-                                              writeData('@0');
-                                            }
-                                          },
-                                          child: Text('OFF')),
-                                    ],
-                                  ),
+                                    ),
+                                    Center(child: Text('Pag 2')),
+                                    Center(child: Text('Pag 3')),
+                                  ],
                                 );
                               } else {
                                 return Text('Check the stream');
