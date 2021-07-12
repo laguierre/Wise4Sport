@@ -23,12 +23,7 @@ class _SearchDevicesState extends State<SearchDevices> {
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
-          colors: [
-            Colors.blueGrey,
-            Colors.grey,
-            Colors.deepOrange.withOpacity(0.3),
-            Colors.red.withOpacity(0.6),
-          ],
+          colors: wiseGradientBack,
           begin: Alignment.topLeft,
           end: Alignment.bottomLeft,
         )),
@@ -46,7 +41,7 @@ class _SearchDevicesState extends State<SearchDevices> {
                       size: 35,
                       color: Colors.black.withOpacity(0.65),
                     ),
-                    Text(" Buscar Sensor",
+                    Text(" Search Sensor",
                         style: TextStyle(
                             color: Colors.black.withOpacity(0.65),
                             fontFamily: 'Roboto',

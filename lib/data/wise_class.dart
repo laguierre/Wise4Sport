@@ -2,99 +2,97 @@ import 'package:flutter/material.dart';
 
 class WiseGPSDataClass {
   WiseGPSData(
-      String TimeStamp,
-      String Lat,
-      String Long,
-      String VelE,
-      String VelN,
-      String ACC,
+      String timeStamp,
+      String lat,
+      String long,
+      String velE,
+      String velN,
+      String acc,
       String PDOP,
-      String SAT,
-      String Fix,
-      String Flag,
-      String aACC,
+      String sat,
+      String fix,
+      String flag,
+      String aAcc,
       String vACC,
       String sACC) {
-    this.TimeStamp = TimeStamp;
-    this.LAT = LAT;
-    this.LONG = LONG;
-    this.VelN = VelN;
-    this.VelE = VelE;
-    this.ACC = ACC;
+    this.timeStamp = timeStamp;
+    this.lat = lat;
+    this.long = long;
+    this.velN = velN;
+    this.velE = velE;
+    this.acc = acc;
     this.PDOP = PDOP;
-    this.SAT = SAT;
-    this.Fix = Fix;
-    this.Flag = Flag;
+    this.sat = sat;
+    this.fix = fix;
+    this.flag = flag;
     this.aACC = aACC;
     this.vACC = vACC;
     this.sACC = sACC;
   }
 
-  String TimeStamp = '';
-  String LAT = '';
-  String LONG = '';
-  String VelE = '';
-  String VelN = '';
-  String ACC = '';
-  String PDOP = '';
-  String SAT = '';
-  String Fix = '';
-  String Flag = '';
-  String aACC = '';
-  String vACC = '';
-  String sACC = '';
+  String timeStamp = 'N/A';
+  String lat = 'N/A';
+  String long = 'N/A';
+  String velE = 'N/A';
+  String velN = 'N/A';
+  String acc = 'N/A';
+  String PDOP = 'N/A';
+  String sat = 'N/A';
+  String fix = 'N/A';
+  String flag = 'N/A';
+  String aACC = 'N/A';
+  String vACC = 'N/A';
+  String sACC = 'N/A';
 
-  String getTimeStamp() {
-    return this.TimeStamp;
-  }
+  String getTimeStamp() => this.timeStamp;
 
-  String getLAT() {
-    return this.LAT;
-  }
+  String getLAT() => this.lat;
 
-  String getLONG() {
-    return this.LONG;
-  }
+  String getLONG() => this.long;
 
-  String getSpeedEast() {
-    return this.VelE;
-  }
+  String getSpeedEast() => this.velE;
 
-  String getSpeedNorth() {
-    return this.VelN;
-  }
+  String getSpeedNorth() => this.velN;
 
-  String getACC() {
-    return this.ACC;
-  }
+  String getACC() => this.acc;
 
-  String getPDOP() {
-    return this.PDOP;
-  }
+  String getPDOP() => this.PDOP;
 
-  String getSAT() {
-    return this.SAT;
-  }
+  String getSAT() => this.sat;
 
-  String getFix() {
-    return this.Fix;
-  }
+  String getFix() => this.fix;
 
-  String getFlag() {
-    return this.Flag;
-  }
+  String getFlag() => this.flag;
 
-  String getsAcc() {
-    return this.sACC;
-  }
+  String getsAcc() => this.sACC;
 
-  String getaAcc() {
-    return this.aACC;
-  }
+  String getaAcc() => this.aACC;
 
-  String getvAcc() {
-    return this.vACC;
-  }
+  String getvAcc() => this.vACC;
 
+  void setTimeStamp(String string) => this.timeStamp = string;
 
+  void setLAT(String string) => this.lat = string;
+
+  void setLONG(String string) => this.long = string;
+
+  void setSpeedEast(String string) => this.velE = string;
+
+  void setSpeedNorth(String string) => this.velN = string;
+
+  void setACC(String string) => this.acc = string;
+
+  void setPDOP(String string) => this.PDOP = string;
+
+  void setSAT(String string) => this.sat = string;
+
+  void setFix(String string) => this.fix = string;
+
+  void setFlag(String string) => this.flag = string;
+
+  void setsAcc(String string) => this.sACC = string;
+
+  void setaAcc(String string) => this.aACC = string;
+
+  void setvAcc(String string) => this.vACC = string;
 }

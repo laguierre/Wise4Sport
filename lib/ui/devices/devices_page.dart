@@ -129,19 +129,19 @@ writeData('@3');
     if (eulerList.length == kGPSDataPackeSize) {
       var GPSData = eulerList[0].split(',');
       if (GPSData.length == 3) {
-        WiseGPSData.TimeStamp = GPSData[0];
-        WiseGPSData.Flag = GPSData[0];
-        WiseGPSData.Fix = GPSData[2];
+        WiseGPSData.timeStamp = GPSData[0];
+        WiseGPSData.flag = GPSData[0];
+        WiseGPSData.fix = GPSData[2];
       }
       GPSData = eulerList[1].split(',');
       if (GPSData.length == 2) {
-        WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
-        WiseGPSData.LONG = GPSData[1];
+        WiseGPSData.lat = GPSData[0].replaceAll("POS: ", "");
+        WiseGPSData.long = GPSData[1];
       }
       GPSData = eulerList[2].split(',');
       if (GPSData.length == 2) {
-        WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
-        WiseGPSData.VelN = GPSData[1];
+        WiseGPSData.velE = GPSData[0].replaceAll("VEL: ", "");
+        WiseGPSData.velN = GPSData[1];
       }
       GPSData = eulerList[3].split(',');
       if (GPSData.length == 3) {
@@ -150,7 +150,7 @@ writeData('@3');
         WiseGPSData.sACC = GPSData[2];
       }
       WiseGPSData.PDOP = eulerList[4].replaceAll('PDOP: ', "");
-      WiseGPSData.SAT = eulerList[5].replaceAll('SAT: ', "");
+      WiseGPSData.sat = eulerList[5].replaceAll('SAT: ', "");
     }
   }
 
@@ -244,12 +244,7 @@ writeData('@3');
                         : Container(
                             decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                              colors: [
-                                Colors.blueGrey,
-                                Colors.grey,
-                                Colors.deepOrange.withOpacity(0.5),
-                                Colors.red.withOpacity(0.5),
-                              ],
+                              colors: wiseGradientBack,
                               begin: Alignment.topLeft,
                               end: Alignment.bottomLeft,
                             )),

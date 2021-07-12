@@ -18,6 +18,10 @@ const kTextColorAlert = Color(0xFF0B8B61);
 const double kSizeOBJ = 6.5;
 const int delaySplash = 5000;
 const int delayTransition = 900;
+List<Color> wiseGradientBack = [Colors.blueGrey,
+  Colors.grey,
+  Colors.red.withOpacity(0.5),
+  Colors.deepOrange.withOpacity(0.5)];
 
 
 
