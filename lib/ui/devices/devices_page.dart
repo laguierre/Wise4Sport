@@ -5,10 +5,12 @@ import 'dart:ffi';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
 import 'package:wise4sport/data/wise_class.dart';
 
 import '../../constants.dart';
+import 'devides_page_fuctions.dart';
 
 const int kGPSDataPackeSize = 6;
 
@@ -31,6 +33,7 @@ class _DevicesPageState extends State<DevicesPage> {
   bool isReadyTx = false;
   late String Pitch = "", Roll = "", Yaw = "", Fila = "";
   var WiseGPSData = new WiseGPSDataClass();
+  int currentIndex = 0;
 
   _DevicesPageState();
 
@@ -43,6 +46,11 @@ class _DevicesPageState extends State<DevicesPage> {
     isReadyBatt = false;
     Pitch = "";
     connectToDevice();
+    if(isReadyRx && isReadyTx){
+writeData('@3');
+    }
+    else
+      print('********************************************************');
   }
 
   connectToDevice() async {
@@ -158,107 +166,633 @@ class _DevicesPageState extends State<DevicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final PageController _controller = PageController(initialPage: 0);
+    final PageController _pageController = PageController(initialPage: 0);
+    var size = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+          extendBodyBehindAppBar: true,
+          extendBody: true,
           appBar: AppBar(
-            title: Text(widget.device.name),
+              iconTheme: IconThemeData(
+                color: Colors.black, //change your color here
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.bluetooth_audio_outlined,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  SizedBox(width: 5),
+                  Text(widget.device.name, style: TextStyle(color: Colors.black, fontSize: 28)),
+                ],
+              )),
+          bottomNavigationBar: Container(
+            color: Colors.transparent,
+            child: BottomNavigationBar(
+              selectedItemColor: Colors.black,
+              unselectedItemColor: Colors.black,
+              backgroundColor: Colors.transparent,
+              elevation: 25,
+              onTap: (value) {
+                currentIndex = value;
+                _pageController.animateToPage(
+                  value,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.decelerate,
+                );
+                setState(() {
+                  if(currentIndex == 0)
+                    writeData('@3');
+                });
+              },
+              items: [
+                BottomNavigationBarItem(
+                    icon: SvgPicture.asset('assets/icons/satellite.svg',
+                        width: 40),
+                    label: 'GPS'),
+                BottomNavigationBarItem(
+                    icon: SvgPicture.asset('assets/icons/gyroscope.svg',
+                        width: 40),
+                    label: 'IMU'),
+                BottomNavigationBarItem(
+                    icon: SvgPicture.asset('assets/icons/cpu.svg', width: 40),
+                    label: 'Sensor'),
+              ],
+            ),
           ),
           body: SafeArea(
-            child: Container(
-                child: !isReadyRx
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Waiting..."),
-                            const SizedBox(height: 15),
-                            CircularProgressIndicator(
-                                backgroundColor: kPrimaryColor),
-                          ],
-                        ),
-                      )
-                    : Container(
-                        child: StreamBuilder<List<int>>(
-                            stream: _stream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<List<int>> snapshot) {
-                              if (snapshot.hasError)
-                                return Text('Error: ${snapshot.error}');
-                              if (snapshot.connectionState ==
-                                  ConnectionState.active) {
-                                //var currentValue = _dataParser(snapshot.data);
-                                _dataParser(snapshot.data!);
-                                return PageView(
-                                  scrollDirection: Axis.horizontal,
-                                  controller: _controller,
-                                  children: [
-                                    Center(
-                                      child: Column(
-                                        children: [
-                                          TextButton(
-                                              onPressed: () {
-                                                if (isReadyTx) {
-                                                  writeData('@3');
-                                                }
-                                              },
-                                              child: Text('Ok')),
-                                          TextButton(
-                                              onPressed: () {
-                                                if (isReadyTx) {
-                                                  disconnectFromDevice();
-                                                  Navigator.of(context)
-                                                      .pop(true);
-                                                }
-                                              },
-                                              child: Text('Volver')),
-                                          Text(WiseGPSData.getTimeStamp()),
-                                          Text(WiseGPSData.getFix()),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text('LAT: ' +
-                                                  WiseGPSData.getLAT()),
-                                              Text('LONG: ' +
-                                                  WiseGPSData.getLONG())
-                                            ],
-                                          ),
-                                          Text('East Speed: ' +
-                                              WiseGPSData.getSpeedEast() +
-                                              '\t\tNorth Speed: ' +
-                                              WiseGPSData.getSpeedNorth()),
-                                          Text('aACC: ' +
-                                              WiseGPSData.getaAcc() +
-                                              '\t\tvACC: ' +
-                                              WiseGPSData.getvAcc() +
-                                              '\t\tsACC: ' +
-                                              WiseGPSData.getsAcc()),
-                                          Text(
-                                              'PDOP: ' + WiseGPSData.getPDOP()),
-                                          Text('Visible SAT: ' +
-                                              WiseGPSData.getSAT()),
-                                          SizedBox(height: 80),
-                                          TextButton(
-                                              onPressed: () {
-                                                if (isReadyTx) {
-                                                  writeData('@0');
-                                                }
-                                              },
-                                              child: Text('OFF')),
-                                        ],
-                                      ),
-                                    ),
-                                    Center(child: Text('Pag 2')),
-                                    Center(child: Text('Pag 3')),
-                                  ],
-                                );
-                              } else {
-                                return Text('Check the stream');
-                              }
-                            }))),
-          )),
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Container(
+                    child: !isReadyRx
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Waiting..."),
+                                const SizedBox(height: 15),
+                                CircularProgressIndicator(
+                                    backgroundColor: kPrimaryColor),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                              colors: [
+                                Colors.blueGrey,
+                                Colors.grey,
+                                Colors.deepOrange.withOpacity(0.5),
+                                Colors.red.withOpacity(0.5),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomLeft,
+                            )),
+                            child: StreamBuilder<List<int>>(
+                                stream: _stream,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<List<int>> snapshot) {
+                                  if (snapshot.hasError)
+                                    return Text('Error: ${snapshot.error}');
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.active) {
+                                    //var currentValue = _dataParser(snapshot.data);
+                                    _dataParser(snapshot.data!);
+                                    return PageView(
+                                      onPageChanged: (page) {
+                                        currentIndex = page;
+                                        setState(() {});
+                                      },
+                                      scrollDirection: Axis.horizontal,
+                                      controller: _pageController,
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 160.0,
+                                                  left: 20,
+                                                  right: 20),
+                                              child: Container(
+                                                  width: double.infinity,
+                                                  height: size.height * 0.7,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white38,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  child: Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 15,
+                                                          right: 15,
+                                                          top: 50),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 80,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Time Stamp ' ,
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 35,
+                                                                    child: Text(
+                                                                      'Time Stamp: ' + WiseGPSData.getTimeStamp(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 120,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 23,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text('FIX: '+ WiseGPSData.getFix(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15)),
+                                                                  Positioned(
+                                                                    top: 30,
+                                                                    child: Text(
+                                                                      'Visible SAT: ' + WiseGPSData.getSAT(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 60,
+                                                                    child: Text(
+                                                                      'PDOP: ' + WiseGPSData.getPDOP(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 80,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Position: ' ,
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 35,
+                                                                    child: Text(
+                                                                      'LAT: ' +  WiseGPSData.getLAT() +'\t\t\t' 'LONG: ' + WiseGPSData.getLONG(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 80,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Vertical Speed: ',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 35,
+                                                                    child: Text(
+                                                                      'East Speed: ' + WiseGPSData.getSpeedEast() + '\t\t\t North Speed: ' + WiseGPSData.getSpeedNorth(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 80,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Acceletarions: ',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 35,
+                                                                    child: Text(
+                                                                      'aACC: '+ WiseGPSData.getaAcc() + '\t\t\tsACC: ' + WiseGPSData.getsAcc()+ '\t\t\tvACC: ' + WiseGPSData.getvAcc(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                        ],
+                                                      ))),
+                                            ),
+                                            Positioned(
+                                                top: 110,
+                                                width: size.width,
+                                                height: 90,
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/satellite.svg',
+                                                )),
+                                          ],
+                                        ),
+                                        Stack(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 160.0,
+                                                  left: 20,
+                                                  right: 20),
+                                              child: Container(
+                                                  width: double.infinity,
+                                                  height: size.height * 0.7,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white38,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  child: Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 15,
+                                                          right: 15,
+                                                          top: 50),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 80,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Quaternions',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 35,
+                                                                    child: Text(
+                                                                      'P: \t\t\t Q:',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 160,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 10),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text(
+                                                                      'Inertial',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 40,
+                                                                    child: Text(
+                                                                      'ACC (X, Y, Z): [m/s^2]',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 75,
+                                                                    child: Text(
+                                                                      'Gyro (X, Y, Z): [m/s^2]',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 110,
+                                                                    child: Text(
+                                                                      'MAG (X, Y, Z): [m/s^2]',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                        ],
+                                                      ))),
+                                            ),
+                                            Positioned(
+                                                top: 110,
+                                                width: size.width,
+                                                height: 85,
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/gyroscope.svg',
+                                                )),
+                                          ],
+                                        ),
+                                        Stack(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: 160.0,
+                                                  left: 20,
+                                                  right: 20),
+                                              child: Container(
+                                                  width: double.infinity,
+                                                  height: size.height * 0.7,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white38,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  child: Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 15,
+                                                          right: 15,
+                                                          top: 10),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 240,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 15),
+                                                              child: Stack(
+                                                                fit: StackFit
+                                                                    .loose,
+                                                                children: [
+                                                                  Text(
+                                                                      'Commands',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned
+                                                                      .fill(
+                                                                    top: 40,
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceEvenly,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        ButtonWiseCMD(
+                                                                            string:
+                                                                                'REC Mode'),
+                                                                        ButtonWiseCMD(
+                                                                            string:
+                                                                                'Erase MEM'),
+                                                                        ButtonWiseCMD(
+                                                                            string:
+                                                                                'Refresh'),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                          Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                              width: double
+                                                                  .infinity,
+                                                              height: 190,
+                                                              padding: EdgeInsets
+                                                                  .only(
+                                                                      top: 10,
+                                                                      left: 15),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Text('Sensor',
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .headline6),
+                                                                  Positioned(
+                                                                    top: 40,
+                                                                    child: Text(
+                                                                      'MAC:',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 75,
+                                                                    child: Text(
+                                                                      'Hw Version: ',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 110,
+                                                                    child: Text(
+                                                                      'Fw Version: ',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 145,
+                                                                    child: Text(
+                                                                      'Memory: ',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )),
+                                                        ],
+                                                      ))),
+                                            ),
+                                            Positioned(
+                                                top: 110,
+                                                width: size.width,
+                                                height: 85,
+                                                child: SvgPicture.asset(
+                                                  'assets/icons/cpu.svg',
+                                                )),
+                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return Text('Check the stream');
+                                  }
+                                }))),
+              ))),
     );
   }
 

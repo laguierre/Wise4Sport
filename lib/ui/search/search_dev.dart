@@ -27,7 +27,7 @@ class _SearchDevicesState extends State<SearchDevices> {
             Colors.blueGrey,
             Colors.grey,
             Colors.deepOrange.withOpacity(0.3),
-            Colors.red.withOpacity(0.4),
+            Colors.red.withOpacity(0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomLeft,
@@ -85,7 +85,8 @@ class _SearchDevicesState extends State<SearchDevices> {
                                           r.device.connect();
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: DevicesPage(device: r.device),
+                                            child:
+                                                DevicesPage(device: r.device),
                                           );
                                         })),
                               ),
