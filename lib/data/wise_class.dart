@@ -1,4 +1,16 @@
-import 'package:flutter/material.dart';
+///Wise Classes///
+class SendWiseCMD {
+  static const String GPSCmdOn = '@3';
+  static const String GPSCmdOff = '@3';
+  static const String IMUCmdOn = '@8';
+  static const String IMUCmdOff = '@8';
+}
+
+class PageWise {
+  static const int pageGPS = 0;
+  static const int pageIMU = 1;
+  static const int pageCFG = 3;
+}
 
 class WiseGPSDataClass {
   WiseGPSData(
@@ -95,6 +107,4 @@ class WiseGPSDataClass {
   String getvAcc() {
     return this.vACC;
   }
-
-
 }

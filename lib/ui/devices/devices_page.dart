@@ -34,6 +34,7 @@ class _DevicesPageState extends State<DevicesPage> {
   late String Pitch = "", Roll = "", Yaw = "", Fila = "";
   var WiseGPSData = new WiseGPSDataClass();
   int currentIndex = 0;
+  int previousIndex = 0;
 
   _DevicesPageState();
 
@@ -44,13 +45,7 @@ class _DevicesPageState extends State<DevicesPage> {
     isReadyRx = false;
     isReadyTx = false;
     isReadyBatt = false;
-    Pitch = "";
     connectToDevice();
-    if(isReadyRx && isReadyTx){
-writeData('@3');
-    }
-    else
-      print('********************************************************');
   }
 
   connectToDevice() async {
@@ -120,37 +115,43 @@ writeData('@3');
     if (!isReadyRx) {
       Navigator.of(context).pop(true); //_Pop();
     }
+
+    ///Strar GPS Data by default///
+    if (isReadyTx) writeData(SendWiseCMD.GPSCmdOn);
   }
 
   _dataParser(List<int> dataFromDevice) {
-    var eulerString = utf8.decode(dataFromDevice);
-    var eulerList = eulerString.split(';');
+    var data = utf8.decode(dataFromDevice);
+    print(data);
+    if (currentIndex == PageWise.pageGPS) {
+      var parser = data.split(';');
 
-    if (eulerList.length == kGPSDataPackeSize) {
-      var GPSData = eulerList[0].split(',');
-      if (GPSData.length == 3) {
-        WiseGPSData.TimeStamp = GPSData[0];
-        WiseGPSData.Flag = GPSData[0];
-        WiseGPSData.Fix = GPSData[2];
+      if (parser.length == kGPSDataPackeSize) {
+        var GPSData = parser[0].split(',');
+        if (GPSData.length == 3) {
+          WiseGPSData.TimeStamp = GPSData[0];
+          WiseGPSData.Flag = GPSData[0];
+          WiseGPSData.Fix = GPSData[2];
+        }
+        GPSData = parser[1].split(',');
+        if (GPSData.length == 2) {
+          WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
+          WiseGPSData.LONG = GPSData[1];
+        }
+        GPSData = parser[2].split(',');
+        if (GPSData.length == 2) {
+          WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
+          WiseGPSData.VelN = GPSData[1];
+        }
+        GPSData = parser[3].split(',');
+        if (GPSData.length == 3) {
+          WiseGPSData.aACC = GPSData[0].replaceAll("ACC:", "");
+          WiseGPSData.vACC = GPSData[1];
+          WiseGPSData.sACC = GPSData[2];
+        }
+        WiseGPSData.PDOP = parser[4].replaceAll('PDOP: ', "");
+        WiseGPSData.SAT = parser[5].replaceAll('SAT: ', "");
       }
-      GPSData = eulerList[1].split(',');
-      if (GPSData.length == 2) {
-        WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
-        WiseGPSData.LONG = GPSData[1];
-      }
-      GPSData = eulerList[2].split(',');
-      if (GPSData.length == 2) {
-        WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
-        WiseGPSData.VelN = GPSData[1];
-      }
-      GPSData = eulerList[3].split(',');
-      if (GPSData.length == 3) {
-        WiseGPSData.aACC = GPSData[0].replaceAll("ACC:", "");
-        WiseGPSData.vACC = GPSData[1];
-        WiseGPSData.sACC = GPSData[2];
-      }
-      WiseGPSData.PDOP = eulerList[4].replaceAll('PDOP: ', "");
-      WiseGPSData.SAT = eulerList[5].replaceAll('SAT: ', "");
     }
   }
 
@@ -187,43 +188,12 @@ writeData('@3');
                     size: 30,
                   ),
                   SizedBox(width: 5),
-                  Text(widget.device.name, style: TextStyle(color: Colors.black, fontSize: 28)),
+                  Text(widget.device.name,
+                      style: TextStyle(color: Colors.black, fontSize: 28)),
                 ],
               )),
-          bottomNavigationBar: Container(
-            color: Colors.transparent,
-            child: BottomNavigationBar(
-              selectedItemColor: Colors.black,
-              unselectedItemColor: Colors.black,
-              backgroundColor: Colors.transparent,
-              elevation: 25,
-              onTap: (value) {
-                currentIndex = value;
-                _pageController.animateToPage(
-                  value,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.decelerate,
-                );
-                setState(() {
-                  if(currentIndex == 0)
-                    writeData('@3');
-                });
-              },
-              items: [
-                BottomNavigationBarItem(
-                    icon: SvgPicture.asset('assets/icons/satellite.svg',
-                        width: 40),
-                    label: 'GPS'),
-                BottomNavigationBarItem(
-                    icon: SvgPicture.asset('assets/icons/gyroscope.svg',
-                        width: 40),
-                    label: 'IMU'),
-                BottomNavigationBarItem(
-                    icon: SvgPicture.asset('assets/icons/cpu.svg', width: 40),
-                    label: 'Sensor'),
-              ],
-            ),
-          ),
+          bottomNavigationBar:
+              buildContainerBottonNavBar(_pageController, currentIndex),
           body: SafeArea(
               top: false,
               bottom: false,
@@ -266,6 +236,18 @@ writeData('@3');
                                     return PageView(
                                       onPageChanged: (page) {
                                         currentIndex = page;
+                                        switch (currentIndex) {
+                                          case 0:
+                                            writeData(SendWiseCMD.GPSCmdOn);
+                                            break;
+                                          case 1:
+                                            break;
+                                          case 2:
+                                            break;
+                                          default:
+                                            break;
+                                        }
+
                                         setState(() {});
                                       },
                                       scrollDirection: Axis.horizontal,
@@ -320,7 +302,7 @@ writeData('@3');
                                                               child: Stack(
                                                                 children: [
                                                                   Text(
-                                                                      'Time Stamp ' ,
+                                                                      'Time Stamp ',
                                                                       style: Theme.of(
                                                                               context)
                                                                           .textTheme
@@ -328,7 +310,9 @@ writeData('@3');
                                                                   Positioned(
                                                                     top: 35,
                                                                     child: Text(
-                                                                      'Time Stamp: ' + WiseGPSData.getTimeStamp(),
+                                                                      'Time Stamp: ' +
+                                                                          WiseGPSData
+                                                                              .getTimeStamp(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -355,14 +339,19 @@ writeData('@3');
                                                                       left: 10),
                                                               child: Stack(
                                                                 children: [
-                                                                  Text('FIX: '+ WiseGPSData.getFix(),
+                                                                  Text(
+                                                                      'FIX: ' +
+                                                                          WiseGPSData
+                                                                              .getFix(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15)),
                                                                   Positioned(
                                                                     top: 30,
                                                                     child: Text(
-                                                                      'Visible SAT: ' + WiseGPSData.getSAT(),
+                                                                      'Visible SAT: ' +
+                                                                          WiseGPSData
+                                                                              .getSAT(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -371,7 +360,9 @@ writeData('@3');
                                                                   Positioned(
                                                                     top: 60,
                                                                     child: Text(
-                                                                      'PDOP: ' + WiseGPSData.getPDOP(),
+                                                                      'PDOP: ' +
+                                                                          WiseGPSData
+                                                                              .getPDOP(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -399,7 +390,7 @@ writeData('@3');
                                                               child: Stack(
                                                                 children: [
                                                                   Text(
-                                                                      'Position: ' ,
+                                                                      'Position: ',
                                                                       style: Theme.of(
                                                                               context)
                                                                           .textTheme
@@ -407,7 +398,13 @@ writeData('@3');
                                                                   Positioned(
                                                                     top: 35,
                                                                     child: Text(
-                                                                      'LAT: ' +  WiseGPSData.getLAT() +'\t\t\t' 'LONG: ' + WiseGPSData.getLONG(),
+                                                                      'LAT: ' +
+                                                                          WiseGPSData
+                                                                              .getLAT() +
+                                                                          '\t\t\t'
+                                                                              'LONG: ' +
+                                                                          WiseGPSData
+                                                                              .getLONG(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -443,7 +440,12 @@ writeData('@3');
                                                                   Positioned(
                                                                     top: 35,
                                                                     child: Text(
-                                                                      'East Speed: ' + WiseGPSData.getSpeedEast() + '\t\t\t North Speed: ' + WiseGPSData.getSpeedNorth(),
+                                                                      'East Speed: ' +
+                                                                          WiseGPSData
+                                                                              .getSpeedEast() +
+                                                                          '\t\t\t North Speed: ' +
+                                                                          WiseGPSData
+                                                                              .getSpeedNorth(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -479,7 +481,15 @@ writeData('@3');
                                                                   Positioned(
                                                                     top: 35,
                                                                     child: Text(
-                                                                      'aACC: '+ WiseGPSData.getaAcc() + '\t\t\tsACC: ' + WiseGPSData.getsAcc()+ '\t\t\tvACC: ' + WiseGPSData.getvAcc(),
+                                                                      'aACC: ' +
+                                                                          WiseGPSData
+                                                                              .getaAcc() +
+                                                                          '\t\t\tsACC: ' +
+                                                                          WiseGPSData
+                                                                              .getsAcc() +
+                                                                          '\t\t\tvACC: ' +
+                                                                          WiseGPSData
+                                                                              .getvAcc(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -793,6 +803,53 @@ writeData('@3');
                                   }
                                 }))),
               ))),
+    );
+  }
+
+  Container buildContainerBottonNavBar(
+      PageController _pageController, int currentIndex) {
+    return Container(
+      color: Colors.transparent,
+      child: BottomNavigationBar(
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black,
+        backgroundColor: Colors.transparent,
+        elevation: 25,
+        onTap: (value) {
+          currentIndex = value;
+          _pageController.animateToPage(
+            value,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.decelerate,
+          );
+          setState(() {
+            switch (currentIndex) {
+              case PageWise.pageGPS:
+                writeData(SendWiseCMD.GPSCmdOn);
+                break;
+              case PageWise.pageIMU:
+                if(previousIndex == PageWise.pageGPS)
+                  writeData(SendWiseCMD.GPSCmdOff);
+                writeData(SendWiseCMD.IMUCmdOn);
+                break;
+              case PageWise.pageCFG:
+                //writeData(SendWiseCMD.GPSCmdOn);
+                break;
+            }
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+              icon: SvgPicture.asset('assets/icons/satellite.svg', width: 40),
+              label: 'GPS'),
+          BottomNavigationBarItem(
+              icon: SvgPicture.asset('assets/icons/gyroscope.svg', width: 40),
+              label: 'IMU'),
+          BottomNavigationBarItem(
+              icon: SvgPicture.asset('assets/icons/cpu.svg', width: 40),
+              label: 'Sensor'),
+        ],
+      ),
     );
   }
 
