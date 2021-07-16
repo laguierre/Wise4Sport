@@ -8,12 +8,11 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
 import 'package:wise4sport/data/wise_class.dart';
+import 'package:wise4sport/ui/devices/wise_gps_page.dart';
+import 'package:wise4sport/ui/devices/wise_imu_page.dart';
 
 import '../../constants.dart';
 import 'devides_page_fuctions.dart';
-
-const int kGPSDataPackeSize = 6;
-const int kIMUDataPackeSize = 6;
 
 class DevicesPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -118,7 +117,7 @@ class _DevicesPageState extends State<DevicesPage> {
       Navigator.of(context).pop(true); //_Pop();
     }
 
-    ///Strar GPS Data by default///
+    ///Start GPS Data by default///
     if (isReadyTx) writeData(SendWiseCMD.GPSCmdOn);
   }
 
@@ -155,9 +154,9 @@ class _DevicesPageState extends State<DevicesPage> {
         WiseGPSData.SAT = parser[5].replaceAll('SAT: ', "");
       }
     }
-    if (currentIndex == PageWise.pageIMU){
+    if (currentIndex == PageWise.pageIMU) {
       var parser = data.split(' ');
-      if(parser.length == kIMUDataPackeSize){
+      if (parser.length == kIMUDataPackeSize) {
         WiseIMUData.setP(parser[1].replaceAll("P:", ""));
         WiseIMUData.setQ(parser[2].replaceAll("Q:", ""));
         WiseIMUData.setV(parser[3].replaceAll("V:", ""));
@@ -266,402 +265,12 @@ class _DevicesPageState extends State<DevicesPage> {
                                       scrollDirection: Axis.horizontal,
                                       controller: _pageController,
                                       children: [
-                                        Stack(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 160.0,
-                                                  left: 20,
-                                                  right: 20),
-                                              child: Container(
-                                                  width: double.infinity,
-                                                  height: size.height * 0.7,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white38,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            30),
-                                                  ),
-                                                  child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15,
-                                                          right: 15,
-                                                          top: 50),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 80,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Time Stamp ',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 35,
-                                                                    child: Text(
-                                                                      'Time Stamp: ' +
-                                                                          WiseGPSData
-                                                                              .getTimeStamp(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 120,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 23,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'FIX: ' +
-                                                                          WiseGPSData
-                                                                              .getFix(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15)),
-                                                                  Positioned(
-                                                                    top: 30,
-                                                                    child: Text(
-                                                                      'Visible SAT: ' +
-                                                                          WiseGPSData
-                                                                              .getSAT(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 60,
-                                                                    child: Text(
-                                                                      'PDOP: ' +
-                                                                          WiseGPSData
-                                                                              .getPDOP(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 80,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Position: ',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 35,
-                                                                    child: Text(
-                                                                      'LAT: ' +
-                                                                          WiseGPSData
-                                                                              .getLAT() +
-                                                                          '\t\t\t'
-                                                                              'LONG: ' +
-                                                                          WiseGPSData
-                                                                              .getLONG(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 80,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Vertical Speed: ',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 35,
-                                                                    child: Text(
-                                                                      'East Speed: ' +
-                                                                          WiseGPSData
-                                                                              .getSpeedEast() +
-                                                                          '\t\t\t North Speed: ' +
-                                                                          WiseGPSData
-                                                                              .getSpeedNorth(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 80,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Acceletarions: ',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 35,
-                                                                    child: Text(
-                                                                      'aACC: ' +
-                                                                          WiseGPSData
-                                                                              .getaAcc() +
-                                                                          '\t\t\tsACC: ' +
-                                                                          WiseGPSData
-                                                                              .getsAcc() +
-                                                                          '\t\t\tvACC: ' +
-                                                                          WiseGPSData
-                                                                              .getvAcc(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                        ],
-                                                      ))),
-                                            ),
-                                            Positioned(
-                                                top: 110,
-                                                width: size.width,
-                                                height: 90,
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/satellite.svg',
-                                                )),
-                                          ],
-                                        ),
-                                        Stack(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 160.0,
-                                                  left: 20,
-                                                  right: 20),
-                                              child: Container(
-                                                  width: double.infinity,
-                                                  height: size.height * 0.7,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white38,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            30),
-                                                  ),
-                                                  child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15,
-                                                          right: 15,
-                                                          top: 50),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 120,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Quaternions',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 40,
-                                                                    child: Text(
-                                                                      'P: ' + WiseIMUData.getP(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 70,
-                                                                    child: Text(
-                                                                      'Q: ' + WiseIMUData.getQ(),
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                          15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 160,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 10),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text(
-                                                                      'Inertial',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 40,
-                                                                    child: Text(
-                                                                      'ACC (X, Y, Z): ' + WiseIMUData.getACC()+ ' [m/s^2]',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 75,
-                                                                    child: Text(
-                                                                      'Gyro (X, Y, Z): ' + WiseIMUData.getV() + ' [m/s^2]',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 110,
-                                                                    child: Text(
-                                                                      'MAG (X, Y, Z): ' + WiseIMUData.getMAG() + '[m/s^2]',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                        ],
-                                                      ))),
-                                            ),
-                                            Positioned(
-                                                top: 110,
-                                                width: size.width,
-                                                height: 85,
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/gyroscope.svg',
-                                                )),
-                                          ],
-                                        ),
+                                        GPSPageWise(
+                                            size: size,
+                                            WiseGPSData: WiseGPSData),
+                                        IMUPageWise(
+                                            size: size,
+                                            WiseIMUData: WiseIMUData),
                                         Stack(
                                           children: [
                                             Padding(
@@ -850,7 +459,6 @@ class _DevicesPageState extends State<DevicesPage> {
                 writeData(SendWiseCMD.GPSCmdOn);
                 break;
               case PageWise.pageIMU:
-
                 writeData(SendWiseCMD.IMUCmdOn);
                 break;
               case PageWise.pageCFG:

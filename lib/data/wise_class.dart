@@ -1,5 +1,10 @@
 import 'dart:core';
 
+const int kGPSDataPackeSize = 6;
+const int kIMUDataPackeSize = 6;
+const String delimiterGPS = ';';
+const String delimiterIMU = ' ';
+
 ///Wise Classes///
 class SendWiseCMD {
   static const String GPSCmdOn = '@3';
