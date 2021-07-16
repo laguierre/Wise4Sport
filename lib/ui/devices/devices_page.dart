@@ -13,6 +13,7 @@ import '../../constants.dart';
 import 'devides_page_fuctions.dart';
 
 const int kGPSDataPackeSize = 6;
+const int kIMUDataPackeSize = 6;
 
 class DevicesPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -33,6 +34,7 @@ class _DevicesPageState extends State<DevicesPage> {
   bool isReadyTx = false;
   late String Pitch = "", Roll = "", Yaw = "", Fila = "";
   var WiseGPSData = new WiseGPSDataClass();
+  var WiseIMUData = new WiseIMUDataClass();
   int currentIndex = 0;
   int previousIndex = 0;
 
@@ -122,7 +124,7 @@ class _DevicesPageState extends State<DevicesPage> {
 
   _dataParser(List<int> dataFromDevice) {
     var data = utf8.decode(dataFromDevice);
-    print(data);
+
     if (currentIndex == PageWise.pageGPS) {
       var parser = data.split(';');
 
@@ -151,6 +153,17 @@ class _DevicesPageState extends State<DevicesPage> {
         }
         WiseGPSData.PDOP = parser[4].replaceAll('PDOP: ', "");
         WiseGPSData.SAT = parser[5].replaceAll('SAT: ', "");
+      }
+    }
+    if (currentIndex == PageWise.pageIMU){
+      var parser = data.split(' ');
+      if(parser.length == kIMUDataPackeSize){
+        WiseIMUData.setP(parser[1].replaceAll("P:", ""));
+        WiseIMUData.setQ(parser[2].replaceAll("Q:", ""));
+        WiseIMUData.setV(parser[3].replaceAll("V:", ""));
+        WiseIMUData.setACC(parser[4].replaceAll("A:", ""));
+        WiseIMUData.setMAG(parser[5].replaceAll("M:", ""));
+        print(parser[5]);
       }
     }
   }
@@ -550,7 +563,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                                               ),
                                                               width: double
                                                                   .infinity,
-                                                              height: 80,
+                                                              height: 120,
                                                               padding: EdgeInsets
                                                                   .only(
                                                                       top: 10,
@@ -564,12 +577,21 @@ class _DevicesPageState extends State<DevicesPage> {
                                                                           .textTheme
                                                                           .headline6),
                                                                   Positioned(
-                                                                    top: 35,
+                                                                    top: 40,
                                                                     child: Text(
-                                                                      'P: \t\t\t Q:',
+                                                                      'P: ' + WiseIMUData.getP(),
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 70,
+                                                                    child: Text(
+                                                                      'Q: ' + WiseIMUData.getQ(),
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                          15),
                                                                     ),
                                                                   ),
                                                                 ],
@@ -602,7 +624,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                                                   Positioned(
                                                                     top: 40,
                                                                     child: Text(
-                                                                      'ACC (X, Y, Z): [m/s^2]',
+                                                                      'ACC (X, Y, Z): ' + WiseIMUData.getACC()+ ' [m/s^2]',
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -611,7 +633,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                                                   Positioned(
                                                                     top: 75,
                                                                     child: Text(
-                                                                      'Gyro (X, Y, Z): [m/s^2]',
+                                                                      'Gyro (X, Y, Z): ' + WiseIMUData.getV() + ' [m/s^2]',
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -620,7 +642,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                                                   Positioned(
                                                                     top: 110,
                                                                     child: Text(
-                                                                      'MAG (X, Y, Z): [m/s^2]',
+                                                                      'MAG (X, Y, Z): ' + WiseIMUData.getMAG() + '[m/s^2]',
                                                                       style: TextStyle(
                                                                           fontSize:
                                                                               15),
@@ -828,12 +850,12 @@ class _DevicesPageState extends State<DevicesPage> {
                 writeData(SendWiseCMD.GPSCmdOn);
                 break;
               case PageWise.pageIMU:
-                if(previousIndex == PageWise.pageGPS)
-                  writeData(SendWiseCMD.GPSCmdOff);
+
                 writeData(SendWiseCMD.IMUCmdOn);
                 break;
               case PageWise.pageCFG:
-                //writeData(SendWiseCMD.GPSCmdOn);
+                if (previousIndex == PageWise.pageIMU)
+                  writeData(SendWiseCMD.IMUCmdOff);
                 break;
             }
           });
