@@ -374,11 +374,11 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   void _CFGOn() {
-
-            writeData('@M');
-
-            writeData('@I');
-
+    writeData('@V');
+    Future.delayed(const Duration(milliseconds: 100), () {});
+    writeData('@I');
+    Future.delayed(const Duration(milliseconds: 100), () {});
+    writeData('@M');
   }
 
   void _imuOn() {
