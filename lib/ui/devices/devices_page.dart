@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert' show utf8;
-import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +7,11 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
 import 'package:wise4sport/data/wise_class.dart';
+import 'package:wise4sport/ui/devices/wise_cfg_page.dart';
 import 'package:wise4sport/ui/devices/wise_gps_page.dart';
 import 'package:wise4sport/ui/devices/wise_imu_page.dart';
 
 import '../../constants.dart';
-import 'devides_page_fuctions.dart';
 
 class DevicesPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -34,8 +33,11 @@ class _DevicesPageState extends State<DevicesPage> {
   late String Pitch = "", Roll = "", Yaw = "", Fila = "";
   var WiseGPSData = new WiseGPSDataClass();
   var WiseIMUData = new WiseIMUDataClass();
+  var WiseCFGData = new WiseCFGDataClass();
   int currentIndex = 0;
-  int previousIndex = 0;
+  int sCMDCfg = 0;
+  bool isGPSon = false;
+  bool isIMUOn = false;
 
   _DevicesPageState();
 
@@ -46,6 +48,7 @@ class _DevicesPageState extends State<DevicesPage> {
     isReadyRx = false;
     isReadyTx = false;
     isReadyBatt = false;
+    int sCMDCfg = 0;
     connectToDevice();
   }
 
@@ -122,48 +125,85 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   _dataParser(List<int> dataFromDevice) {
+    //print('Dato Rx: ' + dataFromDevice.toString());
     var data = utf8.decode(dataFromDevice);
-
+    print(data.toString());
     if (currentIndex == PageWise.pageGPS) {
-      var parser = data.split(';');
-
-      if (parser.length == kGPSDataPackeSize) {
-        var GPSData = parser[0].split(',');
-        if (GPSData.length == 3) {
-          WiseGPSData.TimeStamp = GPSData[0];
-          WiseGPSData.Flag = GPSData[0];
-          WiseGPSData.Fix = GPSData[2];
-        }
-        GPSData = parser[1].split(',');
-        if (GPSData.length == 2) {
-          WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
-          WiseGPSData.LONG = GPSData[1];
-        }
-        GPSData = parser[2].split(',');
-        if (GPSData.length == 2) {
-          WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
-          WiseGPSData.VelN = GPSData[1];
-        }
-        GPSData = parser[3].split(',');
-        if (GPSData.length == 3) {
-          WiseGPSData.aACC = GPSData[0].replaceAll("ACC:", "");
-          WiseGPSData.vACC = GPSData[1];
-          WiseGPSData.sACC = GPSData[2];
-        }
-        WiseGPSData.PDOP = parser[4].replaceAll('PDOP: ', "");
-        WiseGPSData.SAT = parser[5].replaceAll('SAT: ', "");
+      if (data.contains('P:')) {
+        writeData('@8'); //Stop data IMU//
       }
+      _parserGPSData(data);
     }
     if (currentIndex == PageWise.pageIMU) {
-      var parser = data.split(' ');
-      if (parser.length == kIMUDataPackeSize) {
-        WiseIMUData.setP(parser[1].replaceAll("P:", ""));
-        WiseIMUData.setQ(parser[2].replaceAll("Q:", ""));
-        WiseIMUData.setV(parser[3].replaceAll("V:", ""));
-        WiseIMUData.setACC(parser[4].replaceAll("A:", ""));
-        WiseIMUData.setMAG(parser[5].replaceAll("M:", ""));
-        print(parser[5]);
+      if (data.contains('FIX:')) {
+        writeData('@3');
       }
+      _parserIMUData(data);
+    }
+    if (currentIndex == PageWise.pageCFG) {
+      _parserCFGData(data);
+    }
+  }
+
+  void _parserCFGData(String data) {
+    if (data.contains('P:')) writeData(SendWiseCMD.IMUCmdOff);
+
+    if (data.contains('MEMST')) {
+      var parser = data.split(',');
+      if (parser.length == 3) {
+        WiseCFGData.setMem(parser[2]);
+        sCMDCfg = 1;
+      }
+    }
+    if (data.contains('Firmware')) {
+      WiseCFGData.setFwVersion(data.replaceAll('Firmware', ''));
+    }
+    if (data.contains('-')) {
+      print('FIRMWARE');
+      String buffer = data.replaceAll('@I', '');
+      WiseCFGData.setMAC(buffer.toUpperCase());
+      sCMDCfg = 2;
+    }
+  }
+
+  void _parserIMUData(String data) {
+    var parser = data.split(' ');
+    if (parser.length == kIMUDataPackeSize) {
+      WiseIMUData.setP(parser[1].replaceAll("P:", ""));
+      WiseIMUData.setQ(parser[2].replaceAll("Q:", ""));
+      WiseIMUData.setV(parser[3].replaceAll("V:", ""));
+      WiseIMUData.setACC(parser[4].replaceAll("A:", ""));
+      WiseIMUData.setMAG(parser[5].replaceAll("M:", ""));
+    }
+  }
+
+  void _parserGPSData(String data) {
+    var parser = data.split(';');
+    if (parser.length == kGPSDataPackeSize) {
+      var GPSData = parser[0].split(',');
+      if (GPSData.length == 3) {
+        WiseGPSData.TimeStamp = GPSData[0];
+        WiseGPSData.Flag = GPSData[1].replaceAll("flag:", "");
+        WiseGPSData.Fix = GPSData[2].replaceAll("FIX:", "");
+      }
+      GPSData = parser[1].split(',');
+      if (GPSData.length == 2) {
+        WiseGPSData.LAT = GPSData[0].replaceAll("POS: ", "");
+        WiseGPSData.LONG = GPSData[1];
+      }
+      GPSData = parser[2].split(',');
+      if (GPSData.length == 2) {
+        WiseGPSData.VelE = GPSData[0].replaceAll("VEL: ", "");
+        WiseGPSData.VelN = GPSData[1];
+      }
+      GPSData = parser[3].split(',');
+      if (GPSData.length == 3) {
+        WiseGPSData.aACC = GPSData[0].replaceAll("ACC:", "");
+        WiseGPSData.vACC = GPSData[1];
+        WiseGPSData.sACC = GPSData[2];
+      }
+      WiseGPSData.PDOP = parser[4].replaceAll('PDOP: ', "");
+      WiseGPSData.SAT = parser[5].replaceAll('SAT: ', "");
     }
   }
 
@@ -173,7 +213,7 @@ class _DevicesPageState extends State<DevicesPage> {
     } else {
       List<int> bytes = utf8.encode(Data);
       characteristicDeviceTx.write(bytes);
-      print(bytes.toString());
+      //print('Tx BLE:' + bytes.toString());
     }
   }
 
@@ -205,7 +245,7 @@ class _DevicesPageState extends State<DevicesPage> {
                 ],
               )),
           bottomNavigationBar:
-              buildContainerBottonNavBar(_pageController, currentIndex),
+              buildContainerBottomNavBar(_pageController, currentIndex),
           body: SafeArea(
               top: false,
               bottom: false,
@@ -250,17 +290,20 @@ class _DevicesPageState extends State<DevicesPage> {
                                         currentIndex = page;
                                         switch (currentIndex) {
                                           case 0:
-                                            writeData(SendWiseCMD.GPSCmdOn);
+                                            _gpsOn();
                                             break;
                                           case 1:
+                                            _imuOn();
                                             break;
                                           case 2:
+                                            _CFGOn();
                                             break;
                                           default:
                                             break;
                                         }
-
-                                        setState(() {});
+                                        setState(() {
+                                          sCMDCfg = 0;
+                                        });
                                       },
                                       scrollDirection: Axis.horizontal,
                                       controller: _pageController,
@@ -271,162 +314,9 @@ class _DevicesPageState extends State<DevicesPage> {
                                         IMUPageWise(
                                             size: size,
                                             WiseIMUData: WiseIMUData),
-                                        Stack(
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                  top: 160.0,
-                                                  left: 20,
-                                                  right: 20),
-                                              child: Container(
-                                                  width: double.infinity,
-                                                  height: size.height * 0.7,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white38,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            30),
-                                                  ),
-                                                  child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 15,
-                                                          right: 15,
-                                                          top: 10),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 240,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 15),
-                                                              child: Stack(
-                                                                fit: StackFit
-                                                                    .loose,
-                                                                children: [
-                                                                  Text(
-                                                                      'Commands',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned
-                                                                      .fill(
-                                                                    top: 40,
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .spaceEvenly,
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .center,
-                                                                      children: [
-                                                                        ButtonWiseCMD(
-                                                                            string:
-                                                                                'REC Mode'),
-                                                                        ButtonWiseCMD(
-                                                                            string:
-                                                                                'Erase MEM'),
-                                                                        ButtonWiseCMD(
-                                                                            string:
-                                                                                'Refresh'),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                          Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                color: Colors
-                                                                    .white54,
-                                                              ),
-                                                              width: double
-                                                                  .infinity,
-                                                              height: 190,
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      top: 10,
-                                                                      left: 15),
-                                                              child: Stack(
-                                                                children: [
-                                                                  Text('Sensor',
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .headline6),
-                                                                  Positioned(
-                                                                    top: 40,
-                                                                    child: Text(
-                                                                      'MAC:',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 75,
-                                                                    child: Text(
-                                                                      'Hw Version: ',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 110,
-                                                                    child: Text(
-                                                                      'Fw Version: ',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                  Positioned(
-                                                                    top: 145,
-                                                                    child: Text(
-                                                                      'Memory: ',
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )),
-                                                        ],
-                                                      ))),
-                                            ),
-                                            Positioned(
-                                                top: 110,
-                                                width: size.width,
-                                                height: 85,
-                                                child: SvgPicture.asset(
-                                                  'assets/icons/cpu.svg',
-                                                )),
-                                          ],
-                                        ),
+                                        CFGPageWise(
+                                            size: size,
+                                            WiseCFGData: WiseCFGData),
                                       ],
                                     );
                                   } else {
@@ -437,7 +327,7 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
-  Container buildContainerBottonNavBar(
+  Container buildContainerBottomNavBar(
       PageController _pageController, int currentIndex) {
     return Container(
       color: Colors.transparent,
@@ -453,17 +343,17 @@ class _DevicesPageState extends State<DevicesPage> {
             duration: Duration(milliseconds: 300),
             curve: Curves.decelerate,
           );
+
           setState(() {
             switch (currentIndex) {
               case PageWise.pageGPS:
-                writeData(SendWiseCMD.GPSCmdOn);
+                _gpsOn();
                 break;
               case PageWise.pageIMU:
-                writeData(SendWiseCMD.IMUCmdOn);
+                _imuOn();
                 break;
               case PageWise.pageCFG:
-                if (previousIndex == PageWise.pageIMU)
-                  writeData(SendWiseCMD.IMUCmdOff);
+                _CFGOn();
                 break;
             }
           });
@@ -481,6 +371,22 @@ class _DevicesPageState extends State<DevicesPage> {
         ],
       ),
     );
+  }
+
+  void _CFGOn() {
+
+            writeData('@M');
+
+            writeData('@I');
+
+  }
+
+  void _imuOn() {
+    writeData(SendWiseCMD.IMUCmdOn);
+  }
+
+  void _gpsOn() {
+    writeData(SendWiseCMD.GPSCmdOn);
   }
 
   ///Back to the search page///

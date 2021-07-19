@@ -17,140 +17,79 @@ class IMUPageWise extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.only(
-              top: 160.0,
-              left: 20,
-              right: 20),
+          padding: EdgeInsets.only(top: 160.0, left: 20, right: 20),
           child: Container(
               width: double.infinity,
               height: size.height * 0.7,
               decoration: BoxDecoration(
                 color: Colors.white38,
-                borderRadius:
-                BorderRadius.circular(
-                    30),
+                borderRadius: BorderRadius.circular(30),
               ),
               child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 15,
-                      right: 15,
-                      top: 50),
+                  padding: EdgeInsets.only(left: 15, right: 15, top: 50),
                   child: Column(
-                    mainAxisAlignment:
-                    MainAxisAlignment
-                        .spaceEvenly,
-                    crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                          decoration:
-                          BoxDecoration(
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                                20),
-                            color: Colors
-                                .white54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white54,
                           ),
-                          width: double
-                              .infinity,
+                          width: double.infinity,
                           height: 120,
-                          padding: EdgeInsets
-                              .only(
-                              top: 10,
-                              left: 10),
+                          padding: EdgeInsets.only(top: 10, left: 10),
                           child: Stack(
                             children: [
-                              Text(
-                                  'Quaternions',
-                                  style: Theme.of(
-                                      context)
-                                      .textTheme
-                                      .headline6),
+                              Text('Quaternions',
+                                  style: Theme.of(context).textTheme.headline6),
                               Positioned(
                                 top: 40,
                                 child: Text(
-                                  'P: ' +
-                                      WiseIMUData
-                                          .getP(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'P: ' + WiseIMUData.getP(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 70,
                                 child: Text(
-                                  'Q: ' +
-                                      WiseIMUData
-                                          .getQ(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'Q: ' + WiseIMUData.getQ(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                             ],
                           )),
                       Container(
-                          decoration:
-                          BoxDecoration(
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                                20),
-                            color: Colors
-                                .white54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white54,
                           ),
-                          width: double
-                              .infinity,
+                          width: double.infinity,
                           height: 160,
-                          padding: EdgeInsets
-                              .only(
-                              top: 10,
-                              left: 10),
+                          padding: EdgeInsets.only(top: 10, left: 10),
                           child: Stack(
                             children: [
-                              Text(
-                                  'Inertial',
-                                  style: Theme.of(
-                                      context)
-                                      .textTheme
-                                      .headline6),
+                              Text('Inertial',
+                                  style: Theme.of(context).textTheme.headline6),
                               Positioned(
                                 top: 40,
                                 child: Text(
-                                  'ACC (X, Y, Z): ' +
-                                      WiseIMUData
-                                          .getACC() +
-                                      ' [m/s^2]',
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'ACC (X, Y, Z): ' + WiseIMUData.getACC(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 75,
                                 child: Text(
-                                  'Gyro (X, Y, Z): ' +
-                                      WiseIMUData
-                                          .getV() +
-                                      ' [m/s^2]',
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'Gyro (X, Y, Z): ' + WiseIMUData.getV(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 110,
                                 child: Text(
-                                  'MAG (X, Y, Z): ' +
-                                      WiseIMUData
-                                          .getMAG() +
-                                      '[m/s^2]',
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'MAG (X, Y, Z): ' + WiseIMUData.getMAG(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                             ],
@@ -169,5 +108,3 @@ class IMUPageWise extends StatelessWidget {
     );
   }
 }
-
-

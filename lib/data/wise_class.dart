@@ -2,6 +2,7 @@ import 'dart:core';
 
 const int kGPSDataPackeSize = 6;
 const int kIMUDataPackeSize = 6;
+const int kWiseACK = 2;
 const String delimiterGPS = ';';
 const String delimiterIMU = ' ';
 
@@ -11,12 +12,61 @@ class SendWiseCMD {
   static const String GPSCmdOff = '@3';
   static const String IMUCmdOn = '@8';
   static const String IMUCmdOff = '@8';
+  static const String MEMCmd = '@M';
+  static const String MACCmd = '@I';
+  static const String HWVersionCmd = '@H';
 }
 
 class PageWise {
   static const int pageGPS = 0;
   static const int pageIMU = 1;
-  static const int pageCFG = 3;
+  static const int pageCFG = 2;
+}
+
+class WiseCFGDataClass {
+  String mem = 'N/A';
+  String hwVersion = 'N/A';
+  String fwVersion = 'N/A';
+  String mac = 'N/A';
+
+  WiseCFGData(String mem, String hwVersion, String fwVersion, String mac) {
+    this.mem = mem;
+    this.hwVersion = hwVersion;
+    this.fwVersion = fwVersion;
+    this.mac = mac;
+  }
+
+  String getMem() {
+    return this.mem;
+  }
+
+  void setMem(String mem) {
+    this.mem = mem;
+  }
+
+  String getHwVersion() {
+    return this.hwVersion;
+  }
+
+  void setHwVersion(String hwVersion) {
+    this.hwVersion = hwVersion;
+  }
+
+  String getFwVersion() {
+    return this.fwVersion;
+  }
+
+  void setFwVersion(String fwVersion) {
+    this.fwVersion = hwVersion;
+  }
+
+  String getMAC() {
+    return this.mac;
+  }
+
+  void setMAC(String mac) {
+    this.mac = mac;
+  }
 }
 
 class WiseGPSDataClass {
@@ -123,13 +173,7 @@ class WiseIMUDataClass {
   String a = 'N/A';
   String m = 'N/A';
 
-  WiseIMUData(
-    String p,
-    String q,
-    String v,
-    String a,
-    String m,
-  ) {
+  WiseIMUData(String p, String q, String v, String a, String m) {
     this.p = p;
     this.q = q;
     this.v = v;
@@ -172,6 +216,7 @@ class WiseIMUDataClass {
   void setMAG(String m) {
     this.m = m;
   }
+
   String getMAG() {
     return this.m;
   }
