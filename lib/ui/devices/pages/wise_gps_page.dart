@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:wise4sport/data/wise_class.dart';
-
-import '../../constants.dart';
+import 'package:wise4sport/constants.dart';
 
 class GPSPageWise extends StatelessWidget {
   const GPSPageWise({

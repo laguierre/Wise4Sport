@@ -8,9 +8,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
 import 'package:wise4sport/data/utils/responsive.dart';
 import 'package:wise4sport/data/wise_class.dart';
-import 'package:wise4sport/ui/devices/wise_cfg_page.dart';
-import 'package:wise4sport/ui/devices/wise_gps_page.dart';
-import 'package:wise4sport/ui/devices/wise_imu_page.dart';
+import 'package:wise4sport/ui/devices/pages/wise_cfg_page.dart';
+import 'package:wise4sport/ui/devices/pages/wise_gps_page.dart';
+import 'package:wise4sport/ui/devices/pages/wise_imu_page.dart';
 
 import '../../constants.dart';
 
@@ -249,8 +249,8 @@ class _DevicesPageState extends State<DevicesPage> {
                       style: TextStyle(color: Colors.black, fontSize: 28)),
                 ],
               )),
-          bottomNavigationBar:
-              buildContainerBottomNavBar(_pageController, currentIndex),
+          /*bottomNavigationBar:
+              buildContainerBottomNavBar(_pageController, currentIndex),*/
           body: SafeArea(
             top: false,
             bottom: false,
