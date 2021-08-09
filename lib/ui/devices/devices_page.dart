@@ -291,64 +291,58 @@ class _DevicesPageState extends State<DevicesPage> {
                                   ConnectionState.active) {
                                 //var currentValue = _dataParser(snapshot.data);
                                 _dataParser(snapshot.data!);
-                                return Stack(
-
-
-                                    children: [
-                                      Positioned(
-                                          right: responsive.weightPercent(5),
-                                          top: -responsive.heightPercent(18),
-                                          //right: -3 * responsive.diagonalPercent(7),
-                                          child: SizedBox(
-                                              width: sizeBoxSVG,
-                                              child: isGPSon
-                                                  ? SvgPicture.asset(cancelSVG)
-                                                  : SvgPicture.asset(playSVG))),
-                                      PageView(
-                                        onPageChanged: (page) {
-                                          currentIndex = page;
-                                          sCMDCfg = 0;
-                                          switch (currentIndex) {
-                                            case 0:
-                                              setState(() {
-                                                isGPSon = !isGPSon;
-                                                isIMUon = false;
-                                              });
+                                return Stack(children: [
+                                  Positioned(
+                                      right: responsive.weightPercent(5),
+                                      top: -responsive.heightPercent(18),
+                                      //right: -3 * responsive.diagonalPercent(7),
+                                      child: SizedBox(
+                                          width: sizeBoxSVG,
+                                          child: isGPSon
+                                              ? SvgPicture.asset(cancelSVG)
+                                              : SvgPicture.asset(playSVG))),
+                                  PageView(
+                                    onPageChanged: (page) {
+                                      currentIndex = page;
+                                      sCMDCfg = 0;
+                                      switch (currentIndex) {
+                                        case 0:
+                                          setState(() {
+                                            isGPSon = !isGPSon;
+                                            isIMUon = false;
+                                          });
+                                          _gpsOn();
+                                          break;
+                                        case 1:
+                                          setState(() {
+                                            isIMUon = !isIMUon;
+                                            if (isGPSon) {
                                               _gpsOn();
-                                              break;
-                                            case 1:
-                                              setState(() {
-                                                isIMUon = !isIMUon;
-                                                if (isGPSon) {
-                                                  _gpsOn();
-                                                  isGPSon = false;
-                                                }
-                                              });
+                                              isGPSon = false;
+                                            }
+                                          });
 
-                                              //_imuOn();
-                                              break;
-                                            case 2:
-                                              //_CFGOn();
-                                              break;
-                                            default:
-                                              break;
-                                          }
-                                        },
-                                        scrollDirection: Axis.horizontal,
-                                        controller: _pageController,
-                                        children: [
-                                          GPSPageWise(
-                                              size: size,
-                                              WiseGPSData: WiseGPSData),
-                                          IMUPageWise(
-                                              size: size,
-                                              WiseIMUData: WiseIMUData),
-                                          CFGPageWise(
-                                              size: size,
-                                              WiseCFGData: WiseCFGData),
-                                        ],
-                                      )
-                                    ]);
+                                          //_imuOn();
+                                          break;
+                                        case 2:
+                                          //_CFGOn();
+                                          break;
+                                        default:
+                                          break;
+                                      }
+                                    },
+                                    scrollDirection: Axis.horizontal,
+                                    controller: _pageController,
+                                    children: [
+                                      GPSPageWise(
+                                          size: size, WiseGPSData: WiseGPSData),
+                                      IMUPageWise(
+                                          size: size, WiseIMUData: WiseIMUData),
+                                      CFGPageWise(
+                                          size: size, WiseCFGData: WiseCFGData),
+                                    ],
+                                  )
+                                ]);
                               } else {
                                 return Text('Check the stream');
                               }

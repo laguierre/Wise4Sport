@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:wise4sport/data/wise_class.dart';
 
-import 'devides_page_fuctions.dart';
+import '../devices_page_fuctions.dart';
 
 class CFGPageWise extends StatelessWidget {
   const CFGPageWise({
@@ -86,13 +86,13 @@ class CFGPageWise extends StatelessWidget {
                                   children: [
                                     ButtonWiseCMD(
                                         string:
-                                        'REC Mode'),
+                                        'REC Mode', onTap: () {  },),
                                     ButtonWiseCMD(
                                         string:
-                                        'Erase MEM'),
+                                        'Erase MEM', onTap: () {  },),
                                     ButtonWiseCMD(
                                         string:
-                                        'Refresh'),
+                                        'Refresh', onTap: () {  },),
                                   ],
                                 ),
                               ),
