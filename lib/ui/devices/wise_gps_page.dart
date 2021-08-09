@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:wise4sport/data/wise_class.dart';
 
+import '../../constants.dart';
+
 class GPSPageWise extends StatelessWidget {
   const GPSPageWise({
     Key? key,
@@ -266,7 +268,7 @@ class GPSPageWise extends StatelessWidget {
             width: size.width,
             height: 90,
             child: SvgPicture.asset(
-              'assets/icons/satellite.svg',
+              satelliteSVG,
             )),
       ],
     );

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
+import 'package:wise4sport/data/utils/responsive.dart';
 import 'package:wise4sport/data/wise_class.dart';
 import 'package:wise4sport/ui/devices/wise_cfg_page.dart';
 import 'package:wise4sport/ui/devices/wise_gps_page.dart';
@@ -37,7 +38,7 @@ class _DevicesPageState extends State<DevicesPage> {
   int currentIndex = 0;
   int sCMDCfg = 0;
   bool isGPSon = false;
-  bool isIMUOn = false;
+  bool isIMUon = false;
 
   _DevicesPageState();
 
@@ -48,7 +49,6 @@ class _DevicesPageState extends State<DevicesPage> {
     isReadyRx = false;
     isReadyTx = false;
     isReadyBatt = false;
-    int sCMDCfg = 0;
     connectToDevice();
   }
 
@@ -127,14 +127,16 @@ class _DevicesPageState extends State<DevicesPage> {
   _dataParser(List<int> dataFromDevice) {
     //print('Dato Rx: ' + dataFromDevice.toString());
     var data = utf8.decode(dataFromDevice);
-    print(data.toString());
-    if (currentIndex == PageWise.pageGPS) {
-      if (data.contains('P:')) {
+    if (data.isNotEmpty) {
+      print(data.toString());
+      if (currentIndex == PageWise.pageGPS) {
+        _parserGPSData(data);
+        if (!isGPSon) writeData(SendWiseCMD.GPSCmdOff);
+        /*if (data.contains('P:')) {
         writeData('@8'); //Stop data IMU//
+      }*/
       }
-      _parserGPSData(data);
-    }
-    if (currentIndex == PageWise.pageIMU) {
+      /*if (currentIndex == PageWise.pageIMU) {
       if (data.contains('FIX:')) {
         writeData('@3');
       }
@@ -142,6 +144,7 @@ class _DevicesPageState extends State<DevicesPage> {
     }
     if (currentIndex == PageWise.pageCFG) {
       _parserCFGData(data);
+    }*/
     }
   }
 
@@ -221,6 +224,8 @@ class _DevicesPageState extends State<DevicesPage> {
   Widget build(BuildContext context) {
     final PageController _pageController = PageController(initialPage: 0);
     var size = MediaQuery.of(context).size;
+    var responsive = Responsive(context);
+    double sizeBoxSVG = responsive.weightPercent(15);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -247,83 +252,108 @@ class _DevicesPageState extends State<DevicesPage> {
           bottomNavigationBar:
               buildContainerBottomNavBar(_pageController, currentIndex),
           body: SafeArea(
-              top: false,
-              bottom: false,
-              child: Center(
-                child: Container(
-                    child: !isReadyRx
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("Waiting..."),
-                                const SizedBox(height: 15),
-                                CircularProgressIndicator(
-                                    backgroundColor: kPrimaryColor),
-                              ],
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                              colors: [
-                                Colors.blueGrey,
-                                Colors.grey,
-                                Colors.deepOrange.withOpacity(0.5),
-                                Colors.red.withOpacity(0.5),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomLeft,
-                            )),
-                            child: StreamBuilder<List<int>>(
-                                stream: _stream,
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<List<int>> snapshot) {
-                                  if (snapshot.hasError)
-                                    return Text('Error: ${snapshot.error}');
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.active) {
-                                    //var currentValue = _dataParser(snapshot.data);
-                                    _dataParser(snapshot.data!);
-                                    return PageView(
-                                      onPageChanged: (page) {
-                                        currentIndex = page;
-                                        switch (currentIndex) {
-                                          case 0:
-                                            _gpsOn();
-                                            break;
-                                          case 1:
-                                            _imuOn();
-                                            break;
-                                          case 2:
-                                            _CFGOn();
-                                            break;
-                                          default:
-                                            break;
-                                        }
-                                        setState(() {
+            top: false,
+            bottom: false,
+            child: Container(
+                child: !isReadyRx
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Waiting..."),
+                            const SizedBox(height: 15),
+                            CircularProgressIndicator(
+                                backgroundColor: kPrimaryColor),
+                          ],
+                        ),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                          colors: [
+                            Colors.blueGrey,
+                            Colors.grey,
+                            Colors.deepOrange.withOpacity(0.5),
+                            Colors.red.withOpacity(0.5),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomLeft,
+                        )),
+                        child: StreamBuilder<List<int>>(
+                            stream: _stream,
+                            builder: (BuildContext context,
+                                AsyncSnapshot<List<int>> snapshot) {
+                              if (snapshot.hasError)
+                                return Text('Error: ${snapshot.error}');
+                              if (snapshot.connectionState ==
+                                  ConnectionState.active) {
+                                //var currentValue = _dataParser(snapshot.data);
+                                _dataParser(snapshot.data!);
+                                return Stack(
+
+
+                                    children: [
+                                      Positioned(
+                                          right: responsive.weightPercent(5),
+                                          top: -responsive.heightPercent(18),
+                                          //right: -3 * responsive.diagonalPercent(7),
+                                          child: SizedBox(
+                                              width: sizeBoxSVG,
+                                              child: isGPSon
+                                                  ? SvgPicture.asset(cancelSVG)
+                                                  : SvgPicture.asset(playSVG))),
+                                      PageView(
+                                        onPageChanged: (page) {
+                                          currentIndex = page;
                                           sCMDCfg = 0;
-                                        });
-                                      },
-                                      scrollDirection: Axis.horizontal,
-                                      controller: _pageController,
-                                      children: [
-                                        GPSPageWise(
-                                            size: size,
-                                            WiseGPSData: WiseGPSData),
-                                        IMUPageWise(
-                                            size: size,
-                                            WiseIMUData: WiseIMUData),
-                                        CFGPageWise(
-                                            size: size,
-                                            WiseCFGData: WiseCFGData),
-                                      ],
-                                    );
-                                  } else {
-                                    return Text('Check the stream');
-                                  }
-                                }))),
-              ))),
+                                          switch (currentIndex) {
+                                            case 0:
+                                              setState(() {
+                                                isGPSon = !isGPSon;
+                                                isIMUon = false;
+                                              });
+                                              _gpsOn();
+                                              break;
+                                            case 1:
+                                              setState(() {
+                                                isIMUon = !isIMUon;
+                                                if (isGPSon) {
+                                                  _gpsOn();
+                                                  isGPSon = false;
+                                                }
+                                              });
+
+                                              //_imuOn();
+                                              break;
+                                            case 2:
+                                              //_CFGOn();
+                                              break;
+                                            default:
+                                              break;
+                                          }
+                                        },
+                                        scrollDirection: Axis.horizontal,
+                                        controller: _pageController,
+                                        children: [
+                                          GPSPageWise(
+                                              size: size,
+                                              WiseGPSData: WiseGPSData),
+                                          IMUPageWise(
+                                              size: size,
+                                              WiseIMUData: WiseIMUData),
+                                          CFGPageWise(
+                                              size: size,
+                                              WiseCFGData: WiseCFGData),
+                                        ],
+                                      )
+                                    ]);
+                              } else {
+                                return Text('Check the stream');
+                              }
+                            }))),
+          )),
     );
   }
 
@@ -347,13 +377,25 @@ class _DevicesPageState extends State<DevicesPage> {
           setState(() {
             switch (currentIndex) {
               case PageWise.pageGPS:
+                setState(() {
+                  isGPSon = !isGPSon;
+                  isIMUon = false;
+                });
                 _gpsOn();
                 break;
               case PageWise.pageIMU:
-                _imuOn();
+                setState(() {
+                  isIMUon = !isIMUon;
+                  if (isGPSon) {
+                    _gpsOn();
+                    isGPSon = false;
+                  }
+                });
+
+                //_imuOn();
                 break;
               case PageWise.pageCFG:
-                _CFGOn();
+                //_CFGOn();
                 break;
             }
           });
@@ -374,19 +416,23 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   void _CFGOn() {
-    writeData('@V');
+    writeData('@V\n\r');
     Future.delayed(const Duration(milliseconds: 100), () {});
-    writeData('@I');
+    writeData('@I\n\r');
     Future.delayed(const Duration(milliseconds: 100), () {});
-    writeData('@M');
+    writeData('@M\n\r');
   }
 
   void _imuOn() {
-    writeData(SendWiseCMD.IMUCmdOn);
+    writeData(SendWiseCMD.IMUCmdOn + '\n\r');
   }
 
   void _gpsOn() {
-    writeData(SendWiseCMD.GPSCmdOn);
+    if (isGPSon) {
+      writeData(SendWiseCMD.GPSCmdOn + '\n\r');
+    } else {
+      writeData(SendWiseCMD.GPSCmdOff + '\n\r');
+    }
   }
 
   ///Back to the search page///

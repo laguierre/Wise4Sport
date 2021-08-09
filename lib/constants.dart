@@ -25,8 +25,14 @@ List<Color> wiseGradientBack = [Colors.blueGrey,
 
 
 
+
+
+
 //const String fileName3D = 'assets/3d/ESP.obj';
 const String fileName3D = 'assets/3d/v3.obj';
+const String playSVG = "assets/icons/play.svg";
+const String cancelSVG = "assets/icons/cancel.svg";
+const String satelliteSVG = 'assets/icons/satellite.svg';
 
 /**
  * UUID UART Nordic
