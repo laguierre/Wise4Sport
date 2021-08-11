@@ -18,7 +18,7 @@ class Responsive{
     this._diagonal = math.sqrt(math.pow(_width, 2) + math.pow(_height, 2));
     this._isTablet = size.shortestSide >= 600;
   }
-  double weightPercent(double percent) => _width * percent/100;
+  double widthPercent(double percent) => _width * percent/100;
   double heightPercent(double percent) => _height * percent/100;
   double diagonalPercent(double percent) => _diagonal * percent/100;
 }

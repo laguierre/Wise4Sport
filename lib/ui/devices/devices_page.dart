@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
+import 'package:wise4sport/data/utils/btn_widgets.dart';
 import 'package:wise4sport/data/utils/responsive.dart';
 import 'package:wise4sport/data/wise_class.dart';
 import 'package:wise4sport/ui/devices/pages/wise_cfg_page.dart';
@@ -225,7 +226,7 @@ class _DevicesPageState extends State<DevicesPage> {
     final PageController _pageController = PageController(initialPage: 0);
     var size = MediaQuery.of(context).size;
     var responsive = Responsive(context);
-    double sizeBoxSVG = responsive.weightPercent(15);
+    double sizeBoxSVG = responsive.widthPercent(15);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -292,7 +293,23 @@ class _DevicesPageState extends State<DevicesPage> {
                                 //var currentValue = _dataParser(snapshot.data);
                                 _dataParser(snapshot.data!);
                                 return Stack(children: [
+                                  Positioned(right: 10, top: 50,
+                                    child: TextButton(onPressed: (){print('Hola');}, child: Text('Hola')),),
+
                                   Positioned(
+                                    right: responsive.widthPercent(8),
+                                    bottom: responsive.heightPercent(3),
+                                    child: BtnSVG(
+                                      image: playSVG,
+                                      label: 'PLAY',
+                                      height: responsive.heightPercent(7),
+                                      width: responsive.widthPercent(45),
+                                      onTap: () {
+                                        print("Hola");
+                                      },
+                                    ),
+                                  ),
+                                  /*Positioned(
                                       right: responsive.weightPercent(5),
                                       top: -responsive.heightPercent(18),
                                       //right: -3 * responsive.diagonalPercent(7),
@@ -300,7 +317,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                           width: sizeBoxSVG,
                                           child: isGPSon
                                               ? SvgPicture.asset(cancelSVG)
-                                              : SvgPicture.asset(playSVG))),
+                                              : SvgPicture.asset(playSVG))),*/
                                   PageView(
                                     onPageChanged: (page) {
                                       currentIndex = page;
