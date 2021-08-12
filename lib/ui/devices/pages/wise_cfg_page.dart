@@ -19,151 +19,95 @@ class CFGPageWise extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.only(
-              top: 160.0,
-              left: 20,
-              right: 20),
+          padding: EdgeInsets.only(top: 160.0, left: 20, right: 20),
           child: Container(
               width: double.infinity,
               height: size.height * 0.7,
               decoration: BoxDecoration(
                 color: Colors.white38,
-                borderRadius:
-                BorderRadius.circular(
-                    30),
+                borderRadius: BorderRadius.circular(30),
               ),
               child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 15,
-                      right: 15,
-                      top: 10),
+                  padding: EdgeInsets.only(left: 15, right: 15, top: 10),
                   child: Column(
-                    mainAxisAlignment:
-                    MainAxisAlignment
-                        .spaceEvenly,
-                    crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                          decoration:
-                          BoxDecoration(
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                                20),
-                            color: Colors
-                                .white54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white54,
                           ),
-                          width: double
-                              .infinity,
+                          width: double.infinity,
                           height: 240,
-                          padding: EdgeInsets
-                              .only(
-                              top: 10,
-                              left: 15),
+                          padding: EdgeInsets.only(top: 10, left: 15),
                           child: Stack(
-                            fit: StackFit
-                                .loose,
+                            fit: StackFit.loose,
                             children: [
-                              Text(
-                                  'Commands',
-                                  style: Theme.of(
-                                      context)
-                                      .textTheme
-                                      .headline6),
-                              Positioned
-                                  .fill(
+                              Text('Commands',
+                                  style: Theme.of(context).textTheme.headline6),
+                              Positioned.fill(
                                 top: 40,
-                                child:
-                                Column(
+                                child: Column(
                                   mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .spaceEvenly,
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .center,
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     ButtonWiseCMD(
-                                        string:
-                                        'REC Mode', onTap: () {  },),
+                                      string: 'REC Mode',
+                                      onTap: () {},
+                                    ),
                                     ButtonWiseCMD(
-                                        string:
-                                        'Erase MEM', onTap: () {  },),
+                                      string: 'Erase MEM',
+                                      onTap: () {},
+                                    ),
                                     ButtonWiseCMD(
-                                        string:
-                                        'Refresh', onTap: () {  },),
+                                      string: 'Refresh',
+                                      onTap: () {},
+                                    ),
                                   ],
                                 ),
                               ),
                             ],
                           )),
                       Container(
-                          decoration:
-                          BoxDecoration(
-                            borderRadius:
-                            BorderRadius
-                                .circular(
-                                20),
-                            color: Colors
-                                .white54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white54,
                           ),
-                          width: double
-                              .infinity,
+                          width: double.infinity,
                           height: 190,
-                          padding: EdgeInsets
-                              .only(
-                              top: 10,
-                              left: 15),
+                          padding: EdgeInsets.only(top: 10, left: 15),
                           child: Stack(
                             children: [
                               Text('Sensor',
-                                  style: Theme.of(
-                                      context)
-                                      .textTheme
-                                      .headline6),
+                                  style: Theme.of(context).textTheme.headline6),
                               Positioned(
                                 top: 40,
                                 child: Text(
-                                  'MAC: ' +
-                                      WiseCFGData
-                                          .getMAC(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'MAC: ' + WiseCFGData.getMAC(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 75,
                                 child: Text(
-                                  'Hw Version: ' +
-                                      WiseCFGData
-                                          .getHwVersion(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'Hw Version: ' + WiseCFGData.getHwVersion(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 110,
                                 child: Text(
-                                  'Fw Version: ' +
-                                      WiseCFGData
-                                          .getFwVersion(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'Fw Version: ' + WiseCFGData.getFwVersion(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                               Positioned(
                                 top: 145,
                                 child: Text(
-                                  'Memory: ' +
-                                      WiseCFGData
-                                          .getMem(),
-                                  style: TextStyle(
-                                      fontSize:
-                                      15),
+                                  'Memory: ' + WiseCFGData.getMem(),
+                                  style: TextStyle(fontSize: 15),
                                 ),
                               ),
                             ],

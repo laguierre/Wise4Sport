@@ -186,7 +186,7 @@ class _DevicesPageState extends State<DevicesPage> {
     if (parser.length == kGPSDataPackeSize) {
       var GPSData = parser[0].split(',');
       if (GPSData.length == 3) {
-        WiseGPSData.TimeStamp = GPSData[0];
+        WiseGPSData.TimeStamp = GPSData[0].replaceAll('T:', "");
         WiseGPSData.Flag = GPSData[1].replaceAll("flag:", "");
         WiseGPSData.Fix = GPSData[2].replaceAll("FIX:", "");
       }
@@ -230,141 +230,135 @@ class _DevicesPageState extends State<DevicesPage> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-          extendBodyBehindAppBar: true,
-          extendBody: true,
-          appBar: AppBar(
-              iconTheme: IconThemeData(
-                color: Colors.black, //change your color here
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              title: Row(
-                children: [
-                  Icon(
-                    Icons.bluetooth_audio_outlined,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  SizedBox(width: 5),
-                  Text(widget.device.name,
-                      style: TextStyle(color: Colors.black, fontSize: 28)),
-                ],
-              )),
-          /*bottomNavigationBar:
+        extendBodyBehindAppBar: true,
+        extendBody: true,
+        appBar: AppBar(
+            iconTheme: IconThemeData(
+              color: Colors.black, //change your color here
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Row(
+              children: [
+                Icon(
+                  Icons.bluetooth_audio_outlined,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                SizedBox(width: 5),
+                Text(widget.device.name,
+                    style: TextStyle(color: Colors.black, fontSize: 28)),
+              ],
+            )),
+        /*bottomNavigationBar:
               buildContainerBottomNavBar(_pageController, currentIndex),*/
-          body: SafeArea(
+        body: SafeArea(
             top: false,
             bottom: false,
-            child: Container(
-                child: !isReadyRx
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Waiting..."),
-                            const SizedBox(height: 15),
-                            CircularProgressIndicator(
-                                backgroundColor: kPrimaryColor),
-                          ],
-                        ),
-                      )
-                    : Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                          colors: [
-                            Colors.blueGrey,
-                            Colors.grey,
-                            Colors.deepOrange.withOpacity(0.5),
-                            Colors.red.withOpacity(0.5),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomLeft,
-                        )),
-                        child: StreamBuilder<List<int>>(
-                            stream: _stream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<List<int>> snapshot) {
-                              if (snapshot.hasError)
-                                return Text('Error: ${snapshot.error}');
-                              if (snapshot.connectionState ==
-                                  ConnectionState.active) {
-                                //var currentValue = _dataParser(snapshot.data);
-                                _dataParser(snapshot.data!);
-                                return Stack(children: [
-                                  Positioned(right: 10, top: 50,
-                                    child: TextButton(onPressed: (){print('Hola');}, child: Text('Hola')),),
+            child: !isReadyRx
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Waiting..."),
+                        const SizedBox(height: 15),
+                        CircularProgressIndicator(
+                            backgroundColor: kPrimaryColor),
+                      ],
+                    ),
+                  )
+                : Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                      colors: [
+                        Colors.blueGrey,
+                        Colors.grey,
+                        Colors.deepOrange.withOpacity(0.5),
+                        Colors.red.withOpacity(0.5),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomLeft,
+                    )),
+                    child: StreamBuilder<List<int>>(
+                        stream: _stream,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<List<int>> snapshot) {
+                          if (snapshot.hasError)
+                            return Text('Error: ${snapshot.error}');
+                          if (snapshot.connectionState ==
+                              ConnectionState.active) {
+                            //var currentValue = _dataParser(snapshot.data);
+                            _dataParser(snapshot.data!);
+                            return Stack(children: [
+                              Positioned(
+                                right: responsive.widthPercent(8),
+                                bottom: responsive.heightPercent(3),
+                                child: BtnSVG(
+                                  image: playSVG,
+                                  label: 'PLAY',
+                                  height: responsive.heightPercent(7),
+                                  width: responsive.widthPercent(45),
+                                  onTap: () {
+                                    print("Hola");
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: responsive.heith * 0.12,
+                                    bottom: responsive.heith * 0.12,
+                                    left: responsive.width * 0.03,
+                                    right: responsive.width * 0.03),
+                                child: PageView(
+                                  onPageChanged: (page) {
+                                    currentIndex = page;
+                                    sCMDCfg = 0;
+                                    switch (currentIndex) {
+                                      case 0:
+                                        setState(() {
+                                          isGPSon = !isGPSon;
+                                          isIMUon = false;
+                                        });
+                                        _gpsOn();
+                                        break;
+                                      case 1:
+                                        setState(() {
+                                          isIMUon = !isIMUon;
+                                          if (isGPSon) {
+                                            _gpsOn();
+                                            isGPSon = false;
+                                          }
+                                        });
 
-                                  Positioned(
-                                    right: responsive.widthPercent(8),
-                                    bottom: responsive.heightPercent(3),
-                                    child: BtnSVG(
-                                      image: playSVG,
-                                      label: 'PLAY',
-                                      height: responsive.heightPercent(7),
-                                      width: responsive.widthPercent(45),
-                                      onTap: () {
-                                        print("Hola");
-                                      },
-                                    ),
-                                  ),
-                                  /*Positioned(
-                                      right: responsive.weightPercent(5),
-                                      top: -responsive.heightPercent(18),
-                                      //right: -3 * responsive.diagonalPercent(7),
-                                      child: SizedBox(
-                                          width: sizeBoxSVG,
-                                          child: isGPSon
-                                              ? SvgPicture.asset(cancelSVG)
-                                              : SvgPicture.asset(playSVG))),*/
-                                  PageView(
-                                    onPageChanged: (page) {
-                                      currentIndex = page;
-                                      sCMDCfg = 0;
-                                      switch (currentIndex) {
-                                        case 0:
-                                          setState(() {
-                                            isGPSon = !isGPSon;
-                                            isIMUon = false;
-                                          });
-                                          _gpsOn();
-                                          break;
-                                        case 1:
-                                          setState(() {
-                                            isIMUon = !isIMUon;
-                                            if (isGPSon) {
-                                              _gpsOn();
-                                              isGPSon = false;
-                                            }
-                                          });
-
-                                          //_imuOn();
-                                          break;
-                                        case 2:
-                                          //_CFGOn();
-                                          break;
-                                        default:
-                                          break;
-                                      }
-                                    },
-                                    scrollDirection: Axis.horizontal,
-                                    controller: _pageController,
-                                    children: [
-                                      GPSPageWise(
-                                          size: size, WiseGPSData: WiseGPSData),
-                                      IMUPageWise(
-                                          size: size, WiseIMUData: WiseIMUData),
-                                      CFGPageWise(
-                                          size: size, WiseCFGData: WiseCFGData),
-                                    ],
-                                  )
-                                ]);
-                              } else {
-                                return Text('Check the stream');
-                              }
-                            }))),
-          )),
+                                        //_imuOn();
+                                        break;
+                                      case 2:
+                                        //_CFGOn();
+                                        break;
+                                      default:
+                                        break;
+                                    }
+                                  },
+                                  scrollDirection: Axis.horizontal,
+                                  controller: _pageController,
+                                  children: [
+                                    GPSPageWise(
+                                        size: size, WiseGPSData: WiseGPSData),
+                                    IMUPageWise(
+                                        size: size, WiseIMUData: WiseIMUData),
+                                    CFGPageWise(
+                                        size: size, WiseCFGData: WiseCFGData),
+                                  ],
+                                ),
+                              )
+                            ]);
+                          } else {
+                            return Text('Check the stream');
+                          }
+                        }))),
+      ),
     );
   }
 
