@@ -23,8 +23,9 @@ List<Color> wiseGradientBack = [Colors.blueGrey,
   Colors.red.withOpacity(0.5),
   Colors.deepOrange.withOpacity(0.5)];
 
-
-
+///Devices Page constants///
+const double kBorderRadiusMainContainer = 30.0;
+const double kBorderRadiusSlaveContainer = 20.0;
 
 
 
