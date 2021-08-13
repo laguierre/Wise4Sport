@@ -309,9 +309,9 @@ class _DevicesPageState extends State<DevicesPage> {
                                 padding: EdgeInsets.only(
                                     top: responsive.heith * 0.12,
                                     bottom: responsive.heith * 0.12,
-                                    left: responsive.width * 0.03,
-                                    right: responsive.width * 0.03),
-                                child: PageView(
+                          ),
+                                child:
+                                PageView(
                                   onPageChanged: (page) {
                                     currentIndex = page;
                                     sCMDCfg = 0;
