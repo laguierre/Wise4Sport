@@ -34,6 +34,7 @@ const String fileName3D = 'assets/3d/v3.obj';
 const String playSVG = "assets/icons/play.svg";
 const String cancelSVG = "assets/icons/cancel.svg";
 const String satelliteSVG = 'assets/icons/satellite.svg';
+const String cpuSVG = 'assets/icons/cpu.svg';
 
 /**
  * UUID UART Nordic

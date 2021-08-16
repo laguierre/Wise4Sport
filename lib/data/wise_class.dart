@@ -15,6 +15,7 @@ class SendWiseCMD {
   static const String MEMCmd = '@M';
   static const String MACCmd = '@I';
   static const String HWVersionCmd = '@H';
+  static const String FWVersionCmd = '@V\n\r';
 }
 
 class PageWise {
@@ -113,6 +114,22 @@ class WiseGPSDataClass {
   String vACC = 'N/A';
   String sACC = 'N/A';
 
+  void initGPSPage() {
+    this.TimeStamp = 'N/A';
+    this.LAT = 'N/A';
+    this.LONG = 'N/A';
+    this.VelE = 'N/A';
+    this.VelN = 'N/A';
+    this.ACC = 'N/A';
+    this.PDOP = 'N/A';
+    this.SAT = 'N/A';
+    this.Fix = 'N/A';
+    this.Flag = 'N/A';
+    this.aACC = 'N/A';
+    this.vACC = 'N/A';
+    this.sACC = 'N/A';
+  }
+
   String getTimeStamp() {
     return this.TimeStamp;
   }
@@ -179,6 +196,14 @@ class WiseIMUDataClass {
     this.v = v;
     this.a = a;
     this.m = m;
+  }
+
+  void initIMUPage() {
+    this.p = 'N/A';
+    this.q = 'N/A';
+    this.v = 'N/A';
+    this.a = 'N/A';
+    this.m = 'N/A';
   }
 
   String getP() {

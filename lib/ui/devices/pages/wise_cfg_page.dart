@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:wise4sport/data/wise_class.dart';
 
+import '../../../constants.dart';
 import '../devices_page_fuctions.dart';
 
 class CFGPageWise extends StatelessWidget {
@@ -16,113 +17,106 @@ class CFGPageWise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: 160.0, left: 20, right: 20),
-          child: Container(
-              width: double.infinity,
-              height: size.height * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.white38,
-                borderRadius: BorderRadius.circular(30),
+    double kFontSizePageLabelData = size.height * 0.02;
+    return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.transparent,
+        padding: EdgeInsets.symmetric(horizontal: size.width * 0.03),
+        child: Stack(
+            alignment: AlignmentDirectional.topCenter,
+            fit: StackFit.loose,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: size.height * 0.1),
+                child: Container(
+                    decoration: BoxDecoration(
+                  color: Colors.white38,
+                  borderRadius:
+                      BorderRadius.circular(kBorderRadiusMainContainer),
+                )),
               ),
-              child: Padding(
-                  padding: EdgeInsets.only(left: 15, right: 15, top: 10),
+              Positioned(
+                  top: size.height * 0.025,
+                  height: size.height * 0.11,
+                  child: SvgPicture.asset(
+                    cpuSVG,
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(
+                    left: size.height * 0.018,
+                    right: size.height * 0.018,
+                    top: size.height * 0.15,
+                  ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(
+                                kBorderRadiusSlaveContainer),
                             color: Colors.white54,
                           ),
                           width: double.infinity,
-                          height: 240,
-                          padding: EdgeInsets.only(top: 10, left: 15),
-                          child: Stack(
-                            fit: StackFit.loose,
-                            children: [
-                              Text('Commands',
-                                  style: Theme.of(context).textTheme.headline6),
-                              Positioned.fill(
-                                top: 40,
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    ButtonWiseCMD(
-                                      string: 'REC Mode',
-                                      onTap: () {},
-                                    ),
-                                    ButtonWiseCMD(
-                                      string: 'Erase MEM',
-                                      onTap: () {},
-                                    ),
-                                    ButtonWiseCMD(
-                                      string: 'Refresh',
-                                      onTap: () {},
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )),
-                      Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white54,
-                          ),
-                          width: double.infinity,
-                          height: 190,
-                          padding: EdgeInsets.only(top: 10, left: 15),
-                          child: Stack(
+                          height: size.height * 0.22,
+                          padding: EdgeInsets.only(
+                              top: size.height * 0.020,
+                              bottom: size.height * 0.02,
+                              left: size.width * 0.025),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('Sensor',
                                   style: Theme.of(context).textTheme.headline6),
-                              Positioned(
-                                top: 40,
-                                child: Text(
-                                  'MAC: ' + WiseCFGData.getMAC(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
+                              SizedBox(height: size.height * 0.005),
+                              Text(
+                                'MAC: ' + WiseCFGData.getMAC(),
+                                style:
+                                    TextStyle(fontSize: kFontSizePageLabelData),
                               ),
-                              Positioned(
-                                top: 75,
-                                child: Text(
-                                  'Hw Version: ' + WiseCFGData.getHwVersion(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
+                              Text(
+                                'Hw Version: ' + WiseCFGData.getHwVersion(),
+                                style:
+                                    TextStyle(fontSize: kFontSizePageLabelData),
                               ),
-                              Positioned(
-                                top: 110,
-                                child: Text(
-                                  'Fw Version: ' + WiseCFGData.getFwVersion(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
+                              Text(
+                                'Fw Version: ' + WiseCFGData.getFwVersion(),
+                                style:
+                                    TextStyle(fontSize: kFontSizePageLabelData),
                               ),
-                              Positioned(
-                                top: 145,
-                                child: Text(
-                                  'Memory: ' + WiseCFGData.getMem(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
+                              Text(
+                                'Memory: ' + WiseCFGData.getMem(),
+                                style:
+                                    TextStyle(fontSize: kFontSizePageLabelData),
                               ),
                             ],
                           )),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Commands',
+                              style: Theme.of(context).textTheme.headline6),
+                          SizedBox(height: size.height * 0.01),
+                          ButtonWiseCMD(
+                            string: 'REC Mode',
+                            onTap: () {},
+                          ),
+                          ButtonWiseCMD(
+                            string: 'Erase MEM',
+                            onTap: () {},
+                          ),
+                          ButtonWiseCMD(
+                            string: 'Refresh',
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
                     ],
-                  ))),
-        ),
-        Positioned(
-            top: 110,
-            width: size.width,
-            height: 85,
-            child: SvgPicture.asset(
-              'assets/icons/cpu.svg',
-            )),
-      ],
-    );
+                  )),
+            ]));
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:vector_math/vector_math.dart' as VMath;
 import 'package:wise4sport/data/utils/btn_widgets.dart';
 import 'package:wise4sport/data/utils/responsive.dart';
@@ -40,6 +41,12 @@ class _DevicesPageState extends State<DevicesPage> {
   int sCMDCfg = 0;
   bool isGPSon = false;
   bool isIMUon = false;
+  bool isPlay = false;
+  bool isFw = false;
+  bool isHw = false;
+  bool isMem = false;
+  bool isMAC = false;
+  int totalPage = 3;
 
   _DevicesPageState();
 
@@ -133,39 +140,46 @@ class _DevicesPageState extends State<DevicesPage> {
       if (currentIndex == PageWise.pageGPS) {
         _parserGPSData(data);
         if (!isGPSon) writeData(SendWiseCMD.GPSCmdOff);
-        /*if (data.contains('P:')) {
-        writeData('@8'); //Stop data IMU//
-      }*/
+        if (data.contains('P:') && !isIMUon) writeData(SendWiseCMD.IMUCmdOff);
       }
-      /*if (currentIndex == PageWise.pageIMU) {
-      if (data.contains('FIX:')) {
-        writeData('@3');
+      if (currentIndex == PageWise.pageIMU) {
+        if (data.contains('FIX:')) {
+          writeData(SendWiseCMD.GPSCmdOff);
+          return;
+        }
+        _parserIMUData(data);
       }
-      _parserIMUData(data);
-    }
-    if (currentIndex == PageWise.pageCFG) {
-      _parserCFGData(data);
-    }*/
+      if (currentIndex == PageWise.pageCFG) {
+        if (data.contains('P')) {
+          writeData(SendWiseCMD.IMUCmdOff);
+          return;
+        }
+        _parserCFGData(data);
+      }
     }
   }
 
   void _parserCFGData(String data) {
-    if (data.contains('P:')) writeData(SendWiseCMD.IMUCmdOff);
-
+    /*WiseCFGData.setFwVersion('N/A');
+    WiseCFGData.setHwVersion('N/A');
+    WiseCFGData.setMAC('N/A');
+    WiseCFGData.setMem('N/A');*/
     if (data.contains('MEMST')) {
       var parser = data.split(',');
       if (parser.length == 3) {
-        WiseCFGData.setMem(parser[2]);
+        WiseCFGData.setMem(parser[2].replaceAll('\n', ''));
         sCMDCfg = 1;
+        isMem = true;
       }
     }
     if (data.contains('Firmware')) {
       WiseCFGData.setFwVersion(data.replaceAll('Firmware', ''));
+      isFw = true;
     }
     if (data.contains('-')) {
-      print('FIRMWARE');
       String buffer = data.replaceAll('@I', '');
       WiseCFGData.setMAC(buffer.toUpperCase());
+      isMAC = true;
       sCMDCfg = 2;
     }
   }
@@ -217,7 +231,6 @@ class _DevicesPageState extends State<DevicesPage> {
     } else {
       List<int> bytes = utf8.encode(Data);
       characteristicDeviceTx.write(bytes);
-      //print('Tx BLE:' + bytes.toString());
     }
   }
 
@@ -226,7 +239,8 @@ class _DevicesPageState extends State<DevicesPage> {
     final PageController _pageController = PageController(initialPage: 0);
     var size = MediaQuery.of(context).size;
     var responsive = Responsive(context);
-    double sizeBoxSVG = responsive.widthPercent(15);
+    double sizeDotWidth = responsive.diagonalPercent(1.5);
+    double sizeDotSpace = responsive.diagonalPercent(1);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -289,55 +303,30 @@ class _DevicesPageState extends State<DevicesPage> {
                             return Text('Error: ${snapshot.error}');
                           if (snapshot.connectionState ==
                               ConnectionState.active) {
-                            //var currentValue = _dataParser(snapshot.data);
                             _dataParser(snapshot.data!);
                             return Stack(children: [
-                              Positioned(
-                                right: responsive.widthPercent(8),
-                                bottom: responsive.heightPercent(3),
-                                child: BtnSVG(
-                                  image: playSVG,
-                                  label: 'PLAY',
-                                  height: responsive.heightPercent(7),
-                                  width: responsive.widthPercent(45),
-                                  onTap: () {
-                                    print("Hola");
-                                  },
-                                ),
-                              ),
                               Padding(
                                 padding: EdgeInsets.only(
-                                    top: responsive.heith * 0.12,
-                                    bottom: responsive.heith * 0.12,
-                          ),
-                                child:
-                                PageView(
+                                  top: responsive.heith * 0.10,
+                                  bottom: responsive.heith * 0.15,
+                                ),
+                                child: PageView(
                                   onPageChanged: (page) {
-                                    currentIndex = page;
-                                    sCMDCfg = 0;
+                                    setState(() {
+                                      currentIndex = page;
+                                      if (isPlay) {
+                                        isPlay = false;
+                                      }
+                                    });
                                     switch (currentIndex) {
-                                      case 0:
-                                        setState(() {
-                                          isGPSon = !isGPSon;
-                                          isIMUon = false;
-                                        });
-                                        _gpsOn();
+                                      case PageWise.pageGPS:
+                                        _initGPSLabels();
                                         break;
-                                      case 1:
-                                        setState(() {
-                                          isIMUon = !isIMUon;
-                                          if (isGPSon) {
-                                            _gpsOn();
-                                            isGPSon = false;
-                                          }
-                                        });
-
-                                        //_imuOn();
+                                      case PageWise.pageIMU:
+                                        _initIMULabels();
                                         break;
-                                      case 2:
-                                        //_CFGOn();
-                                        break;
-                                      default:
+                                      case PageWise.pageCFG:
+                                        _initCFGLabels();
                                         break;
                                     }
                                   },
@@ -352,7 +341,63 @@ class _DevicesPageState extends State<DevicesPage> {
                                         size: size, WiseCFGData: WiseCFGData),
                                   ],
                                 ),
-                              )
+                              ),
+                              Positioned(
+                                //right: responsive                .widthPercent(responsive.width * 0.03),
+                                bottom: 0,
+                                right: 0,
+                                child: SizedBox(
+                                    height: size.height * 0.14,
+                                    width: size.height * 0.14,
+                                    child: MaterialButton(
+                                      shape: CircleBorder(),
+                                      child: isPlay
+                                          ? SvgPicture.asset(cancelSVG)
+                                          : SvgPicture.asset(playSVG),
+                                      onPressed: () {
+                                        setState(() {
+                                          isPlay = !isPlay;
+                                        });
+                                        switch (currentIndex) {
+                                          case PageWise.pageGPS:
+                                            if (isPlay) {
+                                              isGPSon = true;
+                                            } else {
+                                              isGPSon = false;
+                                            }
+                                            _gpsOn(isGPSon);
+                                            break;
+                                          case PageWise.pageIMU:
+                                            if (isPlay) {
+                                              isIMUon = true;
+                                            } else {
+                                              isIMUon = false;
+                                            }
+                                            _imuOn(isIMUon);
+                                            break;
+                                          case PageWise.pageCFG:
+                                            _CFGOn();
+                                            break;
+                                          default:
+                                            break;
+                                        }
+                                      },
+                                    )),
+                              ),
+                              Positioned(
+                                left: responsive.width / 2 -
+                                    totalPage * sizeDotSpace,
+                                bottom: responsive.heith * 0.12,
+                                child: SmoothPageIndicator(
+                                    effect: WormEffect(
+                                        spacing: sizeDotSpace,
+                                        radius: sizeDotWidth,
+                                        dotWidth: sizeDotWidth,
+                                        dotHeight: sizeDotWidth,
+                                        activeDotColor: Colors.white54),
+                                    controller: _pageController,
+                                    count: totalPage),
+                              ),
                             ]);
                           } else {
                             return Text('Check the stream');
@@ -362,78 +407,64 @@ class _DevicesPageState extends State<DevicesPage> {
     );
   }
 
-  Container buildContainerBottomNavBar(
-      PageController _pageController, int currentIndex) {
-    return Container(
-      color: Colors.transparent,
-      child: BottomNavigationBar(
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
-        backgroundColor: Colors.transparent,
-        elevation: 25,
-        onTap: (value) {
-          currentIndex = value;
-          _pageController.animateToPage(
-            value,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.decelerate,
-          );
+  void _initCFGLabels() {
+    WiseCFGData.fwVersion = 'N/A';
+    WiseCFGData.hwVersion = 'N/A';
+    WiseCFGData.mac = 'N/A';
+    WiseCFGData.mem = 'N/A';
+    isFw = false;
+    isMAC = false;
+    isHw = false;
+    isMem = false;
+  }
 
-          setState(() {
-            switch (currentIndex) {
-              case PageWise.pageGPS:
-                setState(() {
-                  isGPSon = !isGPSon;
-                  isIMUon = false;
-                });
-                _gpsOn();
-                break;
-              case PageWise.pageIMU:
-                setState(() {
-                  isIMUon = !isIMUon;
-                  if (isGPSon) {
-                    _gpsOn();
-                    isGPSon = false;
-                  }
-                });
+  void _initIMULabels() {
+    WiseIMUData.a = 'N/A';
+    WiseIMUData.m = 'N/A';
+    WiseIMUData.p = 'N/A';
+    WiseIMUData.q = 'N/A';
+    WiseIMUData.v = 'N/A';
+  }
 
-                //_imuOn();
-                break;
-              case PageWise.pageCFG:
-                //_CFGOn();
-                break;
-            }
-          });
-        },
-        items: [
-          BottomNavigationBarItem(
-              icon: SvgPicture.asset('assets/icons/satellite.svg', width: 40),
-              label: 'GPS'),
-          BottomNavigationBarItem(
-              icon: SvgPicture.asset('assets/icons/gyroscope.svg', width: 40),
-              label: 'IMU'),
-          BottomNavigationBarItem(
-              icon: SvgPicture.asset('assets/icons/cpu.svg', width: 40),
-              label: 'Sensor'),
-        ],
-      ),
-    );
+  void _initGPSLabels() {
+    WiseGPSData.TimeStamp = "N/A";
+    WiseGPSData.Flag = 'N/A';
+    WiseGPSData.Fix = 'N/A';
+    WiseGPSData.LAT = 'N/A';
+    WiseGPSData.LONG = 'N/A';
+    WiseGPSData.VelE = 'N/A';
+    WiseGPSData.VelN = 'N/A';
+    WiseGPSData.aACC = 'N/A';
+    WiseGPSData.vACC = 'N/A';
+    WiseGPSData.sACC = 'N/A';
+    WiseGPSData.PDOP = 'N/A';
+    WiseGPSData.SAT = 'N/A';
   }
 
   void _CFGOn() {
-    writeData('@V\n\r');
-    Future.delayed(const Duration(milliseconds: 100), () {});
-    writeData('@I\n\r');
-    Future.delayed(const Duration(milliseconds: 100), () {});
-    writeData('@M\n\r');
+    if (!isFw) {
+      writeData(SendWiseCMD.FWVersionCmd);
+      Future.delayed(const Duration(milliseconds: 100), () {});
+    }
+    if (!isMAC) {
+      writeData(SendWiseCMD.MACCmd);
+      Future.delayed(const Duration(milliseconds: 100), () {});
+    }
+    if (!isMem) {
+      writeData(SendWiseCMD.MEMCmd);
+      Future.delayed(const Duration(milliseconds: 100), () {});
+    }
   }
 
-  void _imuOn() {
-    writeData(SendWiseCMD.IMUCmdOn + '\n\r');
+  void _imuOn(bool isOn) {
+    if (isOn)
+      writeData(SendWiseCMD.IMUCmdOn + '\n\r');
+    else
+      writeData(SendWiseCMD.IMUCmdOff + '\n\r');
   }
 
-  void _gpsOn() {
-    if (isGPSon) {
+  void _gpsOn(bool isOn) {
+    if (isOn) {
       writeData(SendWiseCMD.GPSCmdOn + '\n\r');
     } else {
       writeData(SendWiseCMD.GPSCmdOff + '\n\r');

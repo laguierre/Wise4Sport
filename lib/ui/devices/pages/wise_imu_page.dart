@@ -30,7 +30,7 @@ class IMUPageWise extends StatelessWidget {
               child: Container(
                   decoration: BoxDecoration(
                 color: Colors.white38,
-                borderRadius: BorderRadius.circular(kBorderRadiusMainContainer),
+                    borderRadius: BorderRadius.circular(kBorderRadiusMainContainer),
               )),
             ),
             Positioned(
@@ -43,7 +43,7 @@ class IMUPageWise extends StatelessWidget {
                 padding: EdgeInsets.only(
                   left: size.height * 0.018,
                   right: size.height * 0.018,
-                  top: size.height * 0.15,
+                  top: size.height * 0.18,
                 ),
                 child: Container(
                     decoration: BoxDecoration(
@@ -78,90 +78,42 @@ class IMUPageWise extends StatelessWidget {
                         ),
                       ],
                     ))),
+            Padding(
+                padding: EdgeInsets.only(
+                  left: size.height * 0.018,
+                  right: size.height * 0.018,
+                  top: size.height * 0.50,
+                ),
+                child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(kBorderRadiusSlaveContainer),
+                      color: Colors.white54,
+                    ),
+                    width: double.infinity,
+                    height: size.height * 0.18,
+                    padding: EdgeInsets.only(
+                        top: size.height * 0.015,
+                        bottom: size.height * 0.012,
+                        left: size.width * 0.025),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quaternions',
+                            style: Theme.of(context).textTheme.headline6),
+                        SizedBox(height: size.height * 0.001),
+                        Text(
+                          'P: ' + WiseIMUData.getP(),
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          'Q: ' + WiseIMUData.getQ(),
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ))),
           ]),
-      /*Padding(
-          padding: EdgeInsets.only(top: 160.0, left: 20, right: 20),
-          child: Container(
-              width: double.infinity,
-              height: size.height * 0.7,
-              decoration: BoxDecoration(
-                color: Colors.white38,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Padding(
-                  padding: EdgeInsets.only(left: 15, right: 15, top: 50),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white54,
-                          ),
-                          width: double.infinity,
-                          height: 120,
-                          padding: EdgeInsets.only(top: 10, left: 10),
-                          child: Stack(
-                            children: [
-                              Text('Quaternions',
-                                  style: Theme.of(context).textTheme.headline6),
-                              Positioned(
-                                top: 40,
-                                child: Text(
-                                  'P: ' + WiseIMUData.getP(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                              Positioned(
-                                top: 70,
-                                child: Text(
-                                  'Q: ' + WiseIMUData.getQ(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                            ],
-                          )),
-                      Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.white54,
-                          ),
-                          width: double.infinity,
-                          height: 160,
-                          padding: EdgeInsets.only(top: 10, left: 10),
-                          child: Stack(
-                            children: [
-                              Text('Inertial',
-                                  style: Theme.of(context).textTheme.headline6),
-                              Positioned(
-                                top: 40,
-                                child: Text(
-                                  'ACC (X, Y, Z): ' + WiseIMUData.getACC(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                              Positioned(
-                                top: 75,
-                                child: Text(
-                                  'Gyro (X, Y, Z): ' + WiseIMUData.getV(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                              Positioned(
-                                top: 110,
-                                child: Text(
-                                  'MAG (X, Y, Z): ' + WiseIMUData.getMAG(),
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                            ],
-                          )),
-                    ],
-                  ))),
-        ),
-
-      ],*/
     );
   }
 }

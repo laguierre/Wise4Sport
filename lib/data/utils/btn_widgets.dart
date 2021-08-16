@@ -18,24 +18,27 @@ class BtnSVG extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-      InkWell(
-        splashColor: Colors.red,
-      highlightColor: Colors.blue,
+    return InkWell(
+      //splashColor: Colors.deepOrange.withOpacity(0.5),
+      //highlightColor: Colors.red.withOpacity(0.5),
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.only(right: width * 0.1, left: width * 0.1),
+          padding: EdgeInsets.only(right: width * 0.1, left: width * 0.1, top: height * 0.1, bottom: height * 0.1),
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            color: Colors.white38,
+            borderRadius: BorderRadius.all(Radius.circular(height * 0.2)),
           ),
           child: Row(
             children: [
               Text(label, style: Theme.of(context).textTheme.headline6),
               SizedBox(width: width * 0.05),
-              SvgPicture.asset(image, height: height*0.9, color: Colors.black,),
+              SvgPicture.asset(
+                image,
+                height: height * 0.9,
+                color: Colors.black,
+              ),
             ],
           )),
     );
