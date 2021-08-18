@@ -6,7 +6,7 @@ class Responsive{
   bool _isTablet = false;
 
   double get width => _width;
-  double get heith => _height;
+  double get height => _height;
   double get diagonal => _diagonal;
   bool get isTable => _isTablet;
 

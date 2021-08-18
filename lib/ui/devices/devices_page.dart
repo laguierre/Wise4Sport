@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert' show utf8;
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +43,13 @@ class _DevicesPageState extends State<DevicesPage> {
   bool isGPSon = false;
   bool isIMUon = false;
   bool isPlay = false;
+  bool isRefresh = false;
   bool isFw = false;
   bool isHw = false;
   bool isMem = false;
   bool isMAC = false;
   int totalPage = 3;
+  double _angle = 0.0;
 
   _DevicesPageState();
 
@@ -140,11 +143,18 @@ class _DevicesPageState extends State<DevicesPage> {
       if (currentIndex == PageWise.pageGPS) {
         _parserGPSData(data);
         if (!isGPSon) writeData(SendWiseCMD.GPSCmdOff);
-        if (data.contains('P:') && !isIMUon) writeData(SendWiseCMD.IMUCmdOff);
+        if (data.contains('P:') && !isIMUon) {
+          writeData(SendWiseCMD.IMUCmdOff);
+          return;
+        }
       }
       if (currentIndex == PageWise.pageIMU) {
         if (data.contains('FIX:')) {
           writeData(SendWiseCMD.GPSCmdOff);
+          return;
+        }
+        if (data.contains('P:') && !isIMUon) {
+          writeData(SendWiseCMD.IMUCmdOff);
           return;
         }
         _parserIMUData(data);
@@ -168,11 +178,11 @@ class _DevicesPageState extends State<DevicesPage> {
       var parser = data.split(',');
       if (parser.length == 3) {
         WiseCFGData.setMem(parser[2].replaceAll('\n', ''));
-        sCMDCfg = 1;
         isMem = true;
       }
     }
     if (data.contains('Firmware')) {
+      //WiseCFGData.fwVersion = data.replaceAll('Firmware', '');
       WiseCFGData.setFwVersion(data.replaceAll('Firmware', ''));
       isFw = true;
     }
@@ -180,7 +190,6 @@ class _DevicesPageState extends State<DevicesPage> {
       String buffer = data.replaceAll('@I', '');
       WiseCFGData.setMAC(buffer.toUpperCase());
       isMAC = true;
-      sCMDCfg = 2;
     }
   }
 
@@ -241,6 +250,7 @@ class _DevicesPageState extends State<DevicesPage> {
     var responsive = Responsive(context);
     double sizeDotWidth = responsive.diagonalPercent(1.5);
     double sizeDotSpace = responsive.diagonalPercent(1);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -307,25 +317,36 @@ class _DevicesPageState extends State<DevicesPage> {
                             return Stack(children: [
                               Padding(
                                 padding: EdgeInsets.only(
-                                  top: responsive.heith * 0.10,
-                                  bottom: responsive.heith * 0.15,
+                                  top: responsive.height * 0.10,
+                                  bottom: responsive.height * 0.15,
                                 ),
                                 child: PageView(
                                   onPageChanged: (page) {
+                                    currentIndex = page;
                                     setState(() {
-                                      currentIndex = page;
                                       if (isPlay) {
                                         isPlay = false;
                                       }
                                     });
                                     switch (currentIndex) {
                                       case PageWise.pageGPS:
+                                        setState(() {
+                                          isRefresh = false;
+                                          isIMUon = false;
+                                        });
                                         _initGPSLabels();
                                         break;
                                       case PageWise.pageIMU:
                                         _initIMULabels();
+                                        setState(() {
+                                          isRefresh = false;
+                                        });
+
                                         break;
                                       case PageWise.pageCFG:
+                                        setState(() {
+                                          isRefresh = true;
+                                        });
                                         _initCFGLabels();
                                         break;
                                     }
@@ -353,18 +374,23 @@ class _DevicesPageState extends State<DevicesPage> {
                                       shape: CircleBorder(),
                                       child: isPlay
                                           ? SvgPicture.asset(cancelSVG)
-                                          : SvgPicture.asset(playSVG),
+                                          : !isRefresh
+                                              ? SvgPicture.asset(playSVG)
+                                              : Transform.rotate(angle: _angle * pi/180, child: SvgPicture.asset(
+                                                  refreshSVG,
+                                                  height:
+                                                      responsive.height * 0.098,
+                                                )),
                                       onPressed: () {
                                         setState(() {
                                           isPlay = !isPlay;
                                         });
                                         switch (currentIndex) {
                                           case PageWise.pageGPS:
-                                            if (isPlay) {
+                                            if (isPlay)
                                               isGPSon = true;
-                                            } else {
+                                            else
                                               isGPSon = false;
-                                            }
                                             _gpsOn(isGPSon);
                                             break;
                                           case PageWise.pageIMU:
@@ -376,6 +402,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                             _imuOn(isIMUon);
                                             break;
                                           case PageWise.pageCFG:
+                                            isPlay = false;
                                             _CFGOn();
                                             break;
                                           default:
@@ -387,7 +414,7 @@ class _DevicesPageState extends State<DevicesPage> {
                               Positioned(
                                 left: responsive.width / 2 -
                                     totalPage * sizeDotSpace,
-                                bottom: responsive.heith * 0.12,
+                                bottom: responsive.height * 0.12,
                                 child: SmoothPageIndicator(
                                     effect: WormEffect(
                                         spacing: sizeDotSpace,
@@ -442,18 +469,22 @@ class _DevicesPageState extends State<DevicesPage> {
   }
 
   void _CFGOn() {
-    if (!isFw) {
-      writeData(SendWiseCMD.FWVersionCmd);
-      Future.delayed(const Duration(milliseconds: 100), () {});
-    }
-    if (!isMAC) {
-      writeData(SendWiseCMD.MACCmd);
-      Future.delayed(const Duration(milliseconds: 100), () {});
-    }
-    if (!isMem) {
-      writeData(SendWiseCMD.MEMCmd);
-      Future.delayed(const Duration(milliseconds: 100), () {});
-    }
+    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+      if (!isMAC) {
+        writeData(SendWiseCMD.MACCmd);
+      }
+    });
+    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+      if (!isMem) {
+        writeData(SendWiseCMD.MEMCmd);
+      }
+    });
+    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+      if (!isFw) {
+        writeData(SendWiseCMD.FWVersionCmd);
+        //Future.delayed(const Duration(milliseconds: 100), () {});
+      }
+    });
   }
 
   void _imuOn(bool isOn) {

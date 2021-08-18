@@ -15,7 +15,7 @@ class SendWiseCMD {
   static const String MEMCmd = '@M';
   static const String MACCmd = '@I';
   static const String HWVersionCmd = '@H';
-  static const String FWVersionCmd = '@V\n\r';
+  static const String FWVersionCmd = '@V';
 }
 
 class PageWise {
@@ -58,7 +58,7 @@ class WiseCFGDataClass {
   }
 
   void setFwVersion(String fwVersion) {
-    this.fwVersion = hwVersion;
+    this.fwVersion = fwVersion;
   }
 
   String getMAC() {
