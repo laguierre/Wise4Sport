@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:flutter_blue/gen/flutterblue.pb.dart' as protos;
 import 'package:vector_math/vector_math.dart' as VMath;
-import 'package:wise4sport/data/utils/btn_widgets.dart';
 import 'package:wise4sport/data/utils/responsive.dart';
 import 'package:wise4sport/data/wise_class.dart';
 import 'package:wise4sport/ui/devices/pages/wise_cfg_page.dart';
@@ -26,7 +26,8 @@ class DevicesPage extends StatefulWidget {
   _DevicesPageState createState() => _DevicesPageState();
 }
 
-class _DevicesPageState extends State<DevicesPage> {
+class _DevicesPageState extends State<DevicesPage>
+    with TickerProviderStateMixin {
   late BluetoothCharacteristic characteristicDeviceTx; //Servicio de Tx
   late Stream<List<int>> _stream; //Servicio de Rx
   late Stream<List<int>> _battLevel;
@@ -51,6 +52,8 @@ class _DevicesPageState extends State<DevicesPage> {
   int totalPage = 3;
   double _angle = 0.0;
 
+  late AnimationController _animationController;
+
   _DevicesPageState();
 
   @override
@@ -61,6 +64,15 @@ class _DevicesPageState extends State<DevicesPage> {
     isReadyTx = false;
     isReadyBatt = false;
     connectToDevice();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 1))
+          ..stop(canceled: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   connectToDevice() async {
@@ -376,11 +388,27 @@ class _DevicesPageState extends State<DevicesPage> {
                                           ? SvgPicture.asset(cancelSVG)
                                           : !isRefresh
                                               ? SvgPicture.asset(playSVG)
-                                              : Transform.rotate(angle: _angle * pi/180, child: SvgPicture.asset(
-                                                  refreshSVG,
-                                                  height:
-                                                      responsive.height * 0.098,
-                                                )),
+                                              : AnimatedBuilder(
+                                                  animation:
+                                                      _animationController,
+                                                  child: SvgPicture.asset(
+                                                      refreshSVG,
+                                                      height:
+                                                          responsive.height *
+                                                              0.08),
+                                                  builder:
+                                                      (BuildContext context,
+                                                          Widget? child) {
+                                                    return Transform.rotate(
+                                                      angle:
+                                                          _animationController
+                                                                  .value *
+                                                              2 *
+                                                              pi,
+                                                      child: child,
+                                                    );
+                                                  },
+                                                ),
                                       onPressed: () {
                                         setState(() {
                                           isPlay = !isPlay;
@@ -403,7 +431,14 @@ class _DevicesPageState extends State<DevicesPage> {
                                             break;
                                           case PageWise.pageCFG:
                                             isPlay = false;
+                                            _animationController.repeat();
                                             _CFGOn();
+                                            Timer(Duration(seconds: 5), () {
+                                              _animationController.stop(
+                                                  canceled: true);
+                                              _animationController.reset();
+                                            });
+
                                             break;
                                           default:
                                             break;
