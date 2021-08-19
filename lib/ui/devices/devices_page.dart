@@ -154,7 +154,10 @@ class _DevicesPageState extends State<DevicesPage>
       print(data.toString());
       if (currentIndex == PageWise.pageGPS) {
         _parserGPSData(data);
-        if (!isGPSon) writeData(SendWiseCMD.GPSCmdOff);
+        if (!isGPSon) {
+          writeData(SendWiseCMD.GPSCmdOff);
+          return;
+        }
         if (data.contains('P:') && !isIMUon) {
           writeData(SendWiseCMD.IMUCmdOff);
           return;
@@ -172,6 +175,10 @@ class _DevicesPageState extends State<DevicesPage>
         _parserIMUData(data);
       }
       if (currentIndex == PageWise.pageCFG) {
+        if (data.contains('FIX:')) {
+          writeData(SendWiseCMD.GPSCmdOff);
+          return;
+        }
         if (data.contains('P')) {
           writeData(SendWiseCMD.IMUCmdOff);
           return;
@@ -182,10 +189,6 @@ class _DevicesPageState extends State<DevicesPage>
   }
 
   void _parserCFGData(String data) {
-    /*WiseCFGData.setFwVersion('N/A');
-    WiseCFGData.setHwVersion('N/A');
-    WiseCFGData.setMAC('N/A');
-    WiseCFGData.setMem('N/A');*/
     if (data.contains('MEMST')) {
       var parser = data.split(',');
       if (parser.length == 3) {
@@ -194,7 +197,6 @@ class _DevicesPageState extends State<DevicesPage>
       }
     }
     if (data.contains('Firmware')) {
-      //WiseCFGData.fwVersion = data.replaceAll('Firmware', '');
       WiseCFGData.setFwVersion(data.replaceAll('Firmware', ''));
       isFw = true;
     }
@@ -251,7 +253,13 @@ class _DevicesPageState extends State<DevicesPage>
       return;
     } else {
       List<int> bytes = utf8.encode(Data);
-      characteristicDeviceTx.write(bytes);
+      if (bytes.length < 20) {
+        try {
+          await characteristicDeviceTx.write(bytes, withoutResponse: true);
+        } catch (e) {
+          print(e.toString());
+        }
+      }
     }
   }
 
@@ -383,6 +391,12 @@ class _DevicesPageState extends State<DevicesPage>
                                     height: size.height * 0.14,
                                     width: size.height * 0.14,
                                     child: MaterialButton(
+                                      splashColor: Colors.transparent,
+                                      highlightElevation: 0,
+                                      hoverElevation: 0,
+                                      focusElevation: 0,
+                                      elevation: 0,
+                                      disabledElevation: 0,
                                       shape: CircleBorder(),
                                       child: isPlay
                                           ? SvgPicture.asset(cancelSVG)
@@ -431,6 +445,7 @@ class _DevicesPageState extends State<DevicesPage>
                                             break;
                                           case PageWise.pageCFG:
                                             isPlay = false;
+
                                             _animationController.repeat();
                                             _CFGOn();
                                             Timer(Duration(seconds: 5), () {
@@ -504,17 +519,17 @@ class _DevicesPageState extends State<DevicesPage>
   }
 
   void _CFGOn() {
-    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+    Stream.periodic(const Duration(milliseconds: 500)).take(10).listen((_) {
       if (!isMAC) {
         writeData(SendWiseCMD.MACCmd);
       }
     });
-    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+    Stream.periodic(const Duration(milliseconds: 500)).take(10).listen((_) {
       if (!isMem) {
         writeData(SendWiseCMD.MEMCmd);
       }
     });
-    Stream.periodic(const Duration(milliseconds: 300)).take(10).listen((_) {
+    Stream.periodic(const Duration(milliseconds: 500)).take(10).listen((_) {
       if (!isFw) {
         writeData(SendWiseCMD.FWVersionCmd);
         //Future.delayed(const Duration(milliseconds: 100), () {});

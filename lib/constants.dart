@@ -36,6 +36,8 @@ const String cancelSVG = "assets/icons/cancel.svg";
 const String satelliteSVG = 'assets/icons/satellite.svg';
 const String cpuSVG = 'assets/icons/cpu.svg';
 const String refreshSVG = 'assets/icons/refresh.svg';
+const String searchSVG = 'assets/icons/search.svg';
+const String stopSVG = 'assets/icons/stop.svg';
 
 /**
  * UUID UART Nordic

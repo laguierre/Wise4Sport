@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:wise4sport/ui/splash/splash.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MyApp());
 }
