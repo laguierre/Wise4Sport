@@ -39,11 +39,11 @@ class _SearchDevicesState extends State<SearchDevices> {
                     Icon(
                       Icons.bluetooth_audio_outlined,
                       size: 35,
-                      color: Colors.black.withOpacity(0.65),
+                      color: Colors.black,
                     ),
                     Text(" Search Sensor",
                         style: TextStyle(
-                            color: Colors.black.withOpacity(0.65),
+                            color: Colors.black,
                             fontFamily: 'Roboto',
                             fontSize: 35,
                             fontWeight: FontWeight.bold)),
@@ -59,8 +59,8 @@ class _SearchDevicesState extends State<SearchDevices> {
                   padding:
                       EdgeInsets.only(top: 20, bottom: 20, right: 10, left: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(35),
+                    color: kColorMainContainer,
+                    borderRadius: BorderRadius.circular(kBorderRadiusMainContainer),
                   ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,

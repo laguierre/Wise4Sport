@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:flutter_blue/gen/flutterblue.pb.dart' as protos;
-import 'package:vector_math/vector_math.dart' as VMath;
+import 'package:wise4sport/data/utils/btn_widgets.dart';
 import 'package:wise4sport/data/utils/responsive.dart';
 import 'package:wise4sport/data/wise_class.dart';
 import 'package:wise4sport/ui/devices/pages/wise_cfg_page.dart';
@@ -16,6 +15,7 @@ import 'package:wise4sport/ui/devices/pages/wise_gps_page.dart';
 import 'package:wise4sport/ui/devices/pages/wise_imu_page.dart';
 
 import '../../constants.dart';
+
 
 class DevicesPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -49,8 +49,8 @@ class _DevicesPageState extends State<DevicesPage>
   bool isHw = false;
   bool isMem = false;
   bool isMAC = false;
+  bool isREC = false;
   int totalPage = 3;
-  double _angle = 0.0;
 
   late AnimationController _animationController;
 
@@ -185,6 +185,12 @@ class _DevicesPageState extends State<DevicesPage>
         }
         _parserCFGData(data);
       }
+      if (data.contains('@5')) {
+        isREC = true;
+      }
+      if (data.contains('@6')) {
+        isREC = false;
+      }
     }
   }
 
@@ -304,7 +310,7 @@ class _DevicesPageState extends State<DevicesPage>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Waiting..."),
+                        Text("Waiting...", style: TextStyle(fontSize: 20),),
                         const SizedBox(height: 15),
                         CircularProgressIndicator(
                             backgroundColor: kPrimaryColor),
@@ -316,12 +322,7 @@ class _DevicesPageState extends State<DevicesPage>
                     height: double.infinity,
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                      colors: [
-                        Colors.blueGrey,
-                        Colors.grey,
-                        Colors.deepOrange.withOpacity(0.5),
-                        Colors.red.withOpacity(0.5),
-                      ],
+                      colors: wiseGradientBack,
                       begin: Alignment.topLeft,
                       end: Alignment.bottomLeft,
                     )),
@@ -379,7 +380,11 @@ class _DevicesPageState extends State<DevicesPage>
                                     IMUPageWise(
                                         size: size, WiseIMUData: WiseIMUData),
                                     CFGPageWise(
-                                        size: size, WiseCFGData: WiseCFGData),
+                                        size: size,
+                                        WiseCFGData: WiseCFGData,
+                                        characteristicDeviceTx:
+                                            characteristicDeviceTx,
+                                        isREC: isREC),
                                   ],
                                 ),
                               ),
@@ -460,6 +465,25 @@ class _DevicesPageState extends State<DevicesPage>
                                         }
                                       },
                                     )),
+                              ),
+                              Positioned(
+                                left: 10,
+                                bottom: 35,
+                                child: BtnSVG(
+                                  width: 170,
+                                  height: 50,
+                                  label: !isREC ? 'REC' : 'STOP',
+                                  image: !isREC ? recSVG : stopSVG,
+                                  onTap: () {
+                                    setState(() {
+                                      isREC = !isREC;
+                                    });
+                                    if(isREC)
+                                      writeData(SendWiseCMD.RECModeOn);
+                                    else
+                                      writeData(SendWiseCMD.RECModeOff);
+                                  },
+                                ),
                               ),
                               Positioned(
                                 left: responsive.width / 2 -
@@ -552,13 +576,16 @@ class _DevicesPageState extends State<DevicesPage>
     }
   }
 
+
+
+
   ///Back to the search page///
   Future<bool> _onWillPop() async {
     return (await showDialog(
           context: context,
           builder: (context) => new AlertDialog(
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15))),
+                borderRadius: BorderRadius.all(Radius.circular(kBorderRadiusMainContainer))),
             title: Text("Are you sure?"),
             content: Text('Do you want to disconnect device and go back'),
             actions: [
@@ -576,6 +603,6 @@ class _DevicesPageState extends State<DevicesPage>
             ],
           ),
         )) ??
-        false;
+        Future.value(false);
   }
 }

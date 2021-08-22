@@ -50,9 +50,7 @@ class ScanResultTile extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .caption
+              style: Theme.of(context).textTheme.caption
                   ?.apply(color: Colors.black),
               softWrap: true,
             ),
@@ -99,12 +97,12 @@ class ScanResultTile extends StatelessWidget {
           size: 20,
           barCount: 5,
           spacing: 0.2,
-          activeColor: Colors.blue,
-          inactiveColor: Colors.blue[100]
+          activeColor: Colors.black,
+          inactiveColor: Colors.black12
       ),
       trailing: ElevatedButton(
         style: ElevatedButton.styleFrom(primary: kColorBottomConnect,),
-        child: Text('CONNECT'),
+        child: Text('CONNECT', style: TextStyle(color: kTextBtnColor, fontWeight: FontWeight.bold),),
         onPressed: (result.advertisementData.connectable) ? onTap : null,
       ),
       children: <Widget>[

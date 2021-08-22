@@ -16,6 +16,8 @@ class SendWiseCMD {
   static const String MACCmd = '@I';
   static const String HWVersionCmd = '@H';
   static const String FWVersionCmd = '@V';
+  static const String RECModeOn = '@5';
+  static const String RECModeOff = '@6';
 }
 
 class PageWise {
