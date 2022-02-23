@@ -27,8 +27,8 @@ sprintf(BLETx, "%0.2f, %0.2f, %0.2f\n", pitch, roll, yaw);
 
 ## Screenshots
 <p align="center">
+<img src="screenshots/Screenshot_20220223-200557.jpg" height="700">
 <img src="screenshots/Screenshot_20220223-200521.jpg" height="700">
 <img src="screenshots/Screenshot_20220223-200529.jpg" height="700">
 <img src="screenshots/Screenshot_20220223-200546.jpg" height="700">
-<img src="screenshots/Screenshot_20220223-200557.jpg" height="700">
 </p>
